@@ -1,0 +1,178 @@
+.wrapper {
+    background: white;
+    margin: 20px auto;
+    margin-bottom: 10px;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    max-width: 1200px;
+}
+
+.controls {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.controls input {
+    padding: 8px 12px;
+    border-radius: 6px;
+    // border: 1px solid #ddd;
+    font-size: 14px;
+    width: 200px;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+
+    // Đồng bộ chiều cao
+    select,
+    .export,
+    .addCustomer {
+        height: 40px;
+        display: flex;
+        gap: 2px;
+        align-items: center;
+        padding: 0 14px;
+        font-size: 14px;
+        border-radius: 6px;
+        box-sizing: border-box;
+    }
+
+    select {
+        border: 1px solid #ccc;
+        background: white;
+    }
+
+    .export {
+        background: #fff;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+            color: #2a85ff;
+            border-color: #2a85ff;
+        }
+    }
+
+    .addCustomer {
+        background-color: #2f85ff;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+}
+
+.search {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+
+    .searchWrapper {
+        display: flex;
+        align-items: center;
+        background: #f5f5f5;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: none;
+        flex: 1;
+        // max-width: 900px;
+        margin-right: 10px;
+
+        .searchIcon {
+            margin-right: 8px;
+            color: #8e8e93;
+            font-size: 16px;
+        }
+
+        .searchInput {
+            border: none;
+            outline: none;
+            font-size: 14px;
+            background: transparent;
+            flex: 1;
+            color: #333;
+        }
+    }
+
+    .export {
+        display: flex;
+        align-items: center;
+        gap: 8px; // 
+        padding: 10px 14px;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s ease;
+
+        i {
+            font-size: 14px;
+        }
+
+        &:hover {
+            color: #2a85ff;
+            border-color: #2a85ff;
+        }
+    }
+}
+
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th {
+        i {
+            font-size: 11px;
+        }
+    }
+
+    .action {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+}
+
+.table th,
+.table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 15px;
+    color: #737373;
+}
+
+.customer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.name {
+    color: #444050;
+}
+
+.email {
+    font-size: 13px;
+    color: #6d6b77;
+}
+
+.country {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
