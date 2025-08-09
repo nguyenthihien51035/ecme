@@ -1,174 +1,233 @@
 .sidebar {
     position: fixed;
-    left: 0;
     top: 0;
+    left: 0;
     height: 100vh;
-    width: 280px;
-    background: white;
-    border-right: 1px solid #e5e7eb;
+    width: 200px;
+    background: #fff;
+    color: #737373;
     transition: width 0.3s ease;
-    z-index: 999;
-    overflow-y: auto;
-    padding: 0;
+    z-index: 1000; // Cao hơn header
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #e5e5e5;
 
     &.collapsed {
-        width: 70px;
+        width: 80px;
+    }
+}
 
-        .logoText {
-            display: none;
-        }
+// Logo Section - Fixed at top
+.logoSection {
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    height: 70px;
+    z-index: 10;
+    flex-shrink: 0; // Không cho phép shrink
+    cursor: pointer; // Thêm cursor pointer
+    transition: background 0.3s ease; // Thêm transition
 
-        .conceptsHeader {
-            display: none;
-        }
+    &:hover {
+        background: rgba(255, 255, 255, 0.05); // Hover effect
     }
 
-    .logoSection {
-        display: flex;
-        align-items: center;
-        padding: 20px 16px;
-        border-bottom: 1px solid #e5e7eb;
-        gap: 12px;
-
-        .logo {
-            width: 32px;
-            height: 32px;
-            object-fit: contain;
-        }
-
-        .logoText {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1f2937;
-        }
+    .logo {
+        width: 100px;
+        height: 32px;
+        flex-shrink: 0;
     }
 
-    .menuSection {
-        padding: 16px 0;
-    }
-
-    .menuItem {
-        display: flex;
-        align-items: center;
-        padding: 12px 20px;
-        gap: 12px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        color: #6b7280;
-        font-size: 14px;
-        font-weight: 500;
-
-        &.categoryHeader {
-            color: #9ca3af;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            padding-top: 0;
-            margin-bottom: 8px;
-        }
-
-        i {
-            width: 20px;
-            font-size: 16px;
-        }
-
-        &:hover:not(.categoryHeader) {
-            background: #f3f4f6;
-            color: #374151;
-        }
-    }
-
-    .conceptsHeader {
-        padding: 20px 20px 8px 20px;
-        color: #9ca3af;
-        font-size: 12px;
+    .logoText {
+        margin-left: 12px;
+        font-size: 18px;
         font-weight: 600;
-        letter-spacing: 0.5px;
+        opacity: 1;
+        transition: opacity 0.3s ease;
+        white-space: nowrap;
     }
 
-    .conceptSection {
-        padding-bottom: 20px;
+    .sidebar.collapsed & .logoText {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+// Scrollable content area
+.scrollableContent {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    // Custom scrollbar
+    &::-webkit-scrollbar {
+        width: 6px;
     }
 
-    .conceptItem {
-        .conceptMain {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            gap: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: #6b7280;
-            font-size: 14px;
-            font-weight: 500;
-            position: relative;
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
 
-            i {
-                width: 20px;
-                font-size: 16px;
-            }
+    &::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 3px;
 
-            .chevron {
-                margin-left: auto;
-                font-size: 12px;
-                transition: transform 0.2s ease;
-            }
-
-            &:hover {
-                background: #f3f4f6;
-                color: #374151;
-            }
-
-            &.active {
-                background: #dbeafe;
-                color: #2563eb;
-                border-right: 3px solid #2563eb;
-
-                &::before {
-                    content: '';
-                    position: absolute;
-                    left: 0;
-                    top: 0;
-                    bottom: 0;
-                    width: 3px;
-                    background: #2563eb;
-                }
-            }
+        &:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
+    }
 
-        .dropdown {
-            padding-left: 20px;
-            background: #f9fafb;
+    // Firefox scrollbar
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
 
-            .dropdownItem {
-                display: flex;
-                align-items: center;
-                padding: 8px 20px 8px 32px;
-                gap: 12px;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                color: #6b7280;
-                font-size: 13px;
+.menuSection {}
 
-                i {
-                    width: 8px;
-                    color: #d1d5db;
-                }
+.menuItem {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
 
-                &:hover {
-                    background: #e5e7eb;
-                    color: #374151;
-                }
+    &:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
 
-                &.activeSubItem {
-                    color: #2563eb;
-                    background: #dbeafe;
+    &.categoryHeader {
+        color: #737373;
+        font-weight: 600;
+    }
 
-                    i {
-                        color: #2563eb;
-                    }
-                }
-            }
+    &.active {
+        background: rgba(255, 255, 255, 0.1);
+
+        &::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #007bff;
+        }
+    }
+
+    i {
+        width: 20px;
+        font-size: 16px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    span {
+        margin-left: 12px;
+        opacity: 1;
+        transition: opacity 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .sidebar.collapsed & span {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+.conceptsHeader {
+    padding: 20px 20px 10px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+.conceptSection {
+    padding-bottom: 20px;
+}
+
+.conceptItem {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    &.active {
+        background: rgba(255, 255, 255, 0.1);
+
+        &::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #007bff;
+        }
+    }
+
+    i {
+        width: 20px;
+        font-size: 16px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    span {
+        margin-left: 12px;
+        opacity: 1;
+        transition: opacity 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .sidebar.collapsed & span {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+// Tooltip for collapsed state
+.sidebar.collapsed {
+
+    .menuItem:hover::before,
+    .conceptItem:hover::before {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: 70px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #333;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 14px;
+        white-space: nowrap;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+}
+
+// Mobile responsive
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+
+        &.open {
+            transform: translateX(0);
         }
     }
 }

@@ -106,7 +106,7 @@ export default function UserTable() {
                 </td>
                 <td>{c.orders}</td>
                 <td>${c.total.toLocaleString()}</td>
-                <td className={styles.action}>
+                <td className={styles.actionIcon}>
                   <i className="fa-solid fa-pen-to-square" onClick={() => navigate(`/user/edit/${c.id}`)}></i>
                   <i className="fa-solid fa-eye" onClick={() => navigate(`/user/view/${c.id}`)}></i>
                   <i className="fa-solid fa-trash-can"></i>

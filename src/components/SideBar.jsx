@@ -1,16 +1,11 @@
-import React, { useState } from 'react';
-import styles from '../styles/Sidebar.module.scss';
-import { useNavigate } from 'react-router-dom';
-import logo from '../assets/img/logo-light-streamline.png';
+import React from 'react';
+import styles from '../styles/SideBar.module.scss';
+import { useNavigate, useLocation } from 'react-router-dom';
+import logo from '../assets/img/logo-light-full.png';
 
 export default function Sidebar({ isCollapsed, toggleSidebar }) {
     const navigate = useNavigate();
-    const [activeDropdown, setActiveDropdown] = useState(null);
-
-    const toggleDropdown = (key) => {
-        if (isCollapsed) return;
-        setActiveDropdown(prev => prev === key ? null : key);
-    };
+    const location = useLocation();
 
     const menuItems = [
         {
@@ -27,7 +22,7 @@ export default function Sidebar({ isCollapsed, toggleSidebar }) {
         },
         {
             key: 'project',
-            icon: 'fa-solid fa-project-diagram',
+            icon: 'fa-solid fa-rocket',
             label: 'Project',
             path: '/project'
         },
@@ -48,102 +43,100 @@ export default function Sidebar({ isCollapsed, toggleSidebar }) {
     const conceptItems = [
         {
             key: 'ai',
-            icon: 'fa-solid fa-robot',
+            icon: 'fa-solid fa-atom',
             label: 'AI',
-            hasDropdown: true,
-            subItems: ['Machine Learning', 'Neural Networks', 'Deep Learning']
+            path: '/ai'
         },
         {
             key: 'projects',
-            icon: 'fa-solid fa-folder',
+            icon: 'fa-solid fa-building',
             label: 'Projects',
-            hasDropdown: true,
-            subItems: ['Web Apps', 'Mobile Apps', 'Desktop Apps']
+            path: '/projects'
         },
         {
             key: 'customer',
             icon: 'fa-solid fa-users',
             label: 'Customer',
-            hasDropdown: true,
-            subItems: [
-                { label: 'List', path: '/customer/list' },
-                { label: 'Edit', path: '/customer/edit' },
-                { label: 'Create', path: '/customer/create' },
-                { label: 'Details', path: '/customer/details' }
-            ],
-            isActive: true
+            path: '/'
         },
         {
             key: 'products',
             icon: 'fa-solid fa-box',
             label: 'Products',
-            hasDropdown: true,
-            subItems: ['Electronics', 'Clothing', 'Books']
+            path: '/products'
+        },
+        {
+            key: 'orders',
+            icon: 'fa-solid fa-shopping-cart',
+            label: 'Orders',
+            path: '/orders'
+        },
+        {
+            key: 'account',
+            icon: 'fa-solid fa-user-circle',
+            label: 'Account',
+            path: '/account'
+        },
+        {
+            key: 'help',
+            icon: 'fa-solid fa-question-circle',
+            label: 'Help Center',
+            path: '/help'
+        },
+        {
+            key: 'calendar',
+            icon: 'fa-solid fa-calendar',
+            label: 'Calendar',
+            path: '/calendar'
         }
     ];
 
+    const isActiveItem = (path) => {
+        return location.pathname === path || location.pathname.startsWith(path + '/');
+    };
+
     return (
         <div className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''}`}>
-            {/* Logo Section */}
+            {/* Logo Section - Fixed */}
             <div className={styles.logoSection}>
-                <img src={logo} alt="Ecme" className={styles.logo} />
-                {!isCollapsed && <span className={styles.logoText}>Ecme</span>}
+                <img src={logo} alt="Ecme" className={styles.logo} onClick={() => navigate('/')} />
             </div>
 
-            {/* Main Menu */}
-            <div className={styles.menuSection}>
-                {menuItems.map(item => (
-                    <div
-                        key={item.key}
-                        className={`${styles.menuItem} ${item.key === 'dashboard' ? styles.categoryHeader : ''}`}
-                        onClick={() => navigate(item.path)}
-                    >
-                        <i className={item.icon}></i>
-                        {!isCollapsed && <span>{item.label}</span>}
-                    </div>
-                ))}
-            </div>
-
-            {/* Concepts Section */}
-            {!isCollapsed && (
-                <div className={styles.conceptsHeader}>CONCEPTS</div>
-            )}
-
-            <div className={styles.conceptSection}>
-                {conceptItems.map(item => (
-                    <div key={item.key} className={styles.conceptItem}>
+            {/* Scrollable Content */}
+            <div className={styles.scrollableContent}>
+                {/* Main Menu */}
+                <div className={styles.menuSection}>
+                    {menuItems.map(item => (
                         <div
-                            className={`${styles.conceptMain} ${item.isActive ? styles.active : ''}`}
-                            onClick={() => item.hasDropdown ? toggleDropdown(item.key) : navigate(item.path)}
+                            key={item.key}
+                            className={`${styles.menuItem} ${item.key === 'dashboard' ? styles.categoryHeader : ''
+                                } ${isActiveItem(item.path) ? styles.active : ''}`}
+                            onClick={() => navigate(item.path)}
                         >
                             <i className={item.icon}></i>
-                            {!isCollapsed && (
-                                <>
-                                    <span>{item.label}</span>
-                                    {item.hasDropdown && (
-                                        <i className={`fa-solid fa-chevron-${activeDropdown === item.key ? 'up' : 'down'} ${styles.chevron}`}></i>
-                                    )}
-                                </>
-                            )}
+                            {!isCollapsed && <span>{item.label}</span>}
                         </div>
+                    ))}
+                </div>
 
-                        {/* Dropdown */}
-                        {!isCollapsed && item.hasDropdown && activeDropdown === item.key && (
-                            <div className={styles.dropdown}>
-                                {item.subItems.map((subItem, index) => (
-                                    <div
-                                        key={index}
-                                        className={`${styles.dropdownItem} ${subItem.label === 'List' ? styles.activeSubItem : ''}`}
-                                        onClick={() => navigate(subItem.path || '#')}
-                                    >
-                                        <i className="fa-solid fa-circle" style={{ fontSize: '4px' }}></i>
-                                        <span>{subItem.label || subItem}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                ))}
+                {/* Concepts Section */}
+                {!isCollapsed && (
+                    <div className={styles.conceptsHeader}>CONCEPTS</div>
+                )}
+
+                <div className={styles.conceptSection}>
+                    {conceptItems.map(item => (
+                        <div
+                            key={item.key}
+                            className={`${styles.conceptItem} ${isActiveItem(item.path) ? styles.active : ''
+                                }`}
+                            onClick={() => navigate(item.path)}
+                        >
+                            <i className={item.icon}></i>
+                            {!isCollapsed && <span>{item.label}</span>}
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );

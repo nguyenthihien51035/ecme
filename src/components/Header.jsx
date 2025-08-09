@@ -2,14 +2,12 @@ import React from "react";
 import { useState, useRef, useEffect } from "react";
 import styles from "../styles/Header.module.scss";
 import { useNavigate } from "react-router-dom";
-import logo from "../assets/img/logo-light-streamline.png";
+import menuOpen from '../assets/img/menu.png';
 
-
-export default function Header() {
+export default function Header({ toggleSidebar, isCollapsed }) {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
-
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -27,18 +25,26 @@ export default function Header() {
 
   return (
     <div className={styles.topBar}>
-      {/* <div className={styles.searchWrapper}>
-        <span className={styles.searchIcon}>
-          <i className="fa-solid fa-magnifying-glass"></i>
-        </span>
-        <input
-          type="text"
-          placeholder="Search [CTRL + K]"
-          className={styles.searchInput}
-        />
-      </div> */}
-      <div className={styles.logoWrapper} onClick={() => navigate("/")}>
-        <img src={logo} alt="Ecme Logo" className={styles.logo} />
+      {/* Toggle Button và Search */}
+      <div className={styles.leftSection}>
+        <button className={styles.toggleButton} onClick={toggleSidebar}>
+          {isCollapsed ? (
+            <i className="fa-solid fa-bars"></i>
+          ) : (
+            <i className="fa-solid fa-bars-staggered"></i>
+          )}
+        </button>
+
+        <div className={styles.searchWrapper}>
+          <span className={styles.searchIcon}>
+            <i className="fa-solid fa-magnifying-glass"></i>
+          </span>
+          <input
+            type="text"
+            placeholder="Search [CTRL + K]"
+            className={styles.searchInput}
+          />
+        </div>
       </div>
 
       <div className={styles.topIcons}>
