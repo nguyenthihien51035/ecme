@@ -1,247 +1,299 @@
 import React, { useState } from 'react';
 import styles from '../styles/UserCreate.module.scss';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-const UserCreate = () => {
+export default function UserCreate() {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         firstName: '',
-        userName: '',
+        lastName: '',
         email: '',
         phone: '',
-        country: '',
-        address: '',
-        city: '',
-        postalCode: '',
-        tags: '',
+        password: ''
     });
-    const [image, setImage] = useState(null);
+    const [imageFile, setImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
     const [errors, setErrors] = useState({});
+    const [apiError, setApiError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
-        // Clear error when user types
         setErrors({ ...errors, [name]: '' });
+        setApiError('');
     };
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            setImage(URL.createObjectURL(file));
+            if (file.size > 5 * 1024 * 1024) {
+                setErrors({ ...errors, avatar: 'File size must be less than 5MB' });
+                return;
+            }
+            setImageFile(file);
+            setImagePreview(URL.createObjectURL(file));
+            setErrors({ ...errors, avatar: '' });
         }
+    };
+
+    const removeImage = () => {
+        setImageFile(null);
+        setImagePreview(null);
+        const input = document.querySelector('input[type="file"]');
+        if (input) input.value = '';
     };
 
     const validateForm = () => {
         const newErrors = {};
-        if (!formData.firstName) newErrors.firstName = 'First Name is required';
-        if (!formData.email) newErrors.email = 'Email is required';
-        else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Invalid email format';
+
+        if (!formData.firstName.trim()) {
+            newErrors.firstName = 'First name is required';
+        } else if (formData.firstName.length < 2 || formData.firstName.length > 100) {
+            newErrors.firstName = 'First name must be between 2 and 100 characters';
+        }
+
+        if (!formData.lastName.trim()) {
+            newErrors.lastName = 'Last name is required';
+        } else if (formData.lastName.length < 2 || formData.lastName.length > 100) {
+            newErrors.lastName = 'Last name must be between 2 and 100 characters';
+        }
+
+        if (!formData.email.trim()) {
+            newErrors.email = 'Email is required';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            newErrors.email = 'Please enter a valid email address';
+        }
+
+        if (!formData.phone.trim()) {
+            newErrors.phone = 'Phone number is required';
+        } else if (!/^0\d{9}$/.test(formData.phone)) {
+            newErrors.phone = 'Phone number must start with 0 and have exactly 10 digits';
+        }
+
+        if (!formData.password) {
+            newErrors.password = 'Password is required';
+        } else if (
+            !/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/
+                .test(formData.password)
+        ) {
+            newErrors.password = 'Password must have at least 6 characters, including uppercase, lowercase, number, and special character';
+        }
+
         return newErrors;
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    const handleSubmit = async () => {
         const validationErrors = validateForm();
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
             return;
         }
-        console.log('Creating customer:', { ...formData, image });
-        // Here you can add API call to submit form data
+
+        setIsSubmitting(true);
+
+        try {
+            const data = new FormData();
+            data.append("firstName", formData.firstName);
+            data.append("lastName", formData.lastName);
+            data.append("email", formData.email);
+            data.append("phone", formData.phone);
+            data.append("password", formData.password);
+            if (imageFile) {
+                data.append("avatar", imageFile);
+            }
+
+            await axios.post(
+                "http://localhost:8080/api/v1/users",
+                data,
+                { headers: { "Content-Type": "multipart/form-data" } }
+            );
+
+            alert('User created successfully!');
+            setFormData({
+                firstName: '',
+                lastName: '',
+                email: '',
+                phone: '',
+                password: ''
+            });
+            removeImage();
+            setErrors({});
+        } catch (error) {
+            if (error.response && error.response.data) {
+                setApiError(error.response.data.message || "Failed to create user. Please try again.");
+            } else {
+                setApiError("Failed to create user. Please try again.");
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleDiscard = () => {
-        setFormData({
-            firstName: '',
-            userName: '',
-            email: '',
-            phone: '',
-            country: '',
-            address: '',
-            city: '',
-            postalCode: '',
-            tags: '',
-        });
-        setImage(null);
-        setErrors({});
+        if (Object.values(formData).some(value => value.trim()) || imageFile) {
+            if (window.confirm('Are you sure you want to discard all changes?')) {
+                setFormData({
+                    firstName: '',
+                    lastName: '',
+                    email: '',
+                    phone: '',
+                    password: ''
+                });
+                removeImage();
+                setErrors({});
+                setApiError('');
+            }
+        }
     };
 
     return (
         <div className={styles.container}>
-            <h2>Create customer</h2>
-            <form onSubmit={handleSubmit}>
-                <div className={styles.mainGrid}>
-                    <div className={styles.leftColumn}>
-                        <section className={styles.section}>
-                            <h3>Overview</h3>
-                            <div className={styles.grid2}>
-                                <div>
-                                    <label>First Name</label>
-                                    <input
-                                        type="text"
-                                        name="firstName"
-                                        value={formData.firstName}
-                                        onChange={handleInputChange}
-                                        placeholder="First Name"
-                                    />
-                                    {errors.firstName && <span className={styles.error}>{errors.firstName}</span>}
-                                </div>
-                                <div>
-                                    <label>User Name</label>
-                                    <input
-                                        type="text"
-                                        name="userName"
-                                        value={formData.userName}
-                                        onChange={handleInputChange}
-                                        placeholder="Last Name"
-                                    />
-                                </div>
-                                <div className={styles.fullWidth}>
-                                    <label>Email</label>
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleInputChange}
-                                        placeholder="Email"
-                                    />
-                                    {errors.email && <span className={styles.error}>{errors.email}</span>}
-                                </div>
-                                <div className={styles.fullWidth}>
-                                    <label>Phone number</label>
-                                    <div className={styles.phoneInput}>
-                                        <div className={styles.countryCode}>
-                                            <select
-                                                name="countryCode"
-                                                onChange={handleInputChange}
-                                                style={{ background: 'transparent', border: 'none', outline: 'none', margin: '0' }}
-                                            >
-                                                <option value="+1">🇺🇸 +1</option>
-                                                <option value="+84">🇻🇳 +84</option>
-                                                <option value="+81">🇯🇵 +81</option>
-                                            </select>
-                                        </div>
-                                        <input
-                                            type="text"
-                                            name="phone"
-                                            value={formData.phone}
-                                            onChange={handleInputChange}
-                                            placeholder="Phone Number"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
+            <h2 className={styles.h2}>Create User</h2>
 
-                        <section className={styles.section}>
-                            <h3>Address Information</h3>
-                            <div className={styles.grid2}>
-                                <div className={styles.fullWidth}>
-                                    <label>Country</label>
-                                    <select
-                                        name="country"
-                                        value={formData.country}
-                                        onChange={handleInputChange}
-                                    >
-                                        <option value="">Select Country</option>
-                                        <option value="us">🇺🇸 United States</option>
-                                        <option value="vn">🇻🇳 Vietnam</option>
-                                        <option value="jp">🇯🇵 Japan</option>
-                                    </select>
-                                </div>
-                                <div className={styles.fullWidth}>
-                                    <label>Address</label>
-                                    <input
-                                        type="text"
-                                        name="address"
-                                        value={formData.address}
-                                        onChange={handleInputChange}
-                                        placeholder="Address"
-                                    />
-                                </div>
-                                <div>
-                                    <label>City</label>
-                                    <input
-                                        type="text"
-                                        name="city"
-                                        value={formData.city}
-                                        onChange={handleInputChange}
-                                        placeholder="City"
-                                    />
-                                </div>
-                                <div>
-                                    <label>Postal Code</label>
-                                    <input
-                                        type="text"
-                                        name="postalCode"
-                                        value={formData.postalCode}
-                                        onChange={handleInputChange}
-                                        placeholder="Postal Code"
-                                    />
-                                </div>
+            {apiError && (
+                <div className={`${styles.section} ${styles.errorBox}`}>
+                    <span className={styles.error}>{apiError}</span>
+                </div>
+            )}
+
+            <div className={styles.mainGrid}>
+                <div className={styles.leftColumn}>
+                    {/* Personal Information */}
+                    <div className={styles.section}>
+                        <h3 className={styles.h3}>Personal Information</h3>
+                        <div className={styles.grid2}>
+                            <div>
+                                <label className={styles.label}>First Name</label>
+                                <input
+                                    className={styles.input}
+                                    name="firstName"
+                                    value={formData.firstName}
+                                    onChange={handleInputChange}
+                                    placeholder="Enter first name"
+                                />
+                                {errors.firstName && <span className={styles.error}>{errors.firstName}</span>}
                             </div>
-                        </section>
+                            <div>
+                                <label className={styles.label}>Last Name</label>
+                                <input
+                                    className={styles.input}
+                                    name="lastName"
+                                    value={formData.lastName}
+                                    onChange={handleInputChange}
+                                    placeholder="Enter last name"
+                                />
+                                {errors.lastName && <span className={styles.error}>{errors.lastName}</span>}
+                            </div>
+                        </div>
                     </div>
 
-                    <div className={styles.rightColumn}>
-                        <section className={styles.section}>
-                            <h3>Image</h3>
-                            <div className={styles.imageContainer}>
-                                {image ? (
+                    {/* Contact Information */}
+                    <div className={styles.section}>
+                        <h3 className={styles.h3}>Contact Information</h3>
+                        <div className={styles.fullWidth}>
+                            <label className={styles.label}>Email</label>
+                            <input
+                                className={styles.input}
+                                name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                placeholder="Enter email address"
+                            />
+                            {errors.email && <span className={styles.error}>{errors.email}</span>}
+                        </div>
+
+                        <div className={styles.fullWidth}>
+                            <label className={styles.label}>Phone</label>
+                            <div className={styles.phoneInput}>
+                                <div className={styles.countryCode}>+84</div>
+                                <input
+                                    className={`${styles.input} ${styles.flex1}`}
+                                    name="phone"
+                                    value={formData.phone}
+                                    onChange={handleInputChange}
+                                    placeholder="Enter phone number"
+                                />
+                            </div>
+                            {errors.phone && <span className={styles.error}>{errors.phone}</span>}
+                        </div>
+                    </div>
+
+                    {/* Security */}
+                    <div className={styles.section}>
+                        <h3 className={styles.h3}>Security</h3>
+                        <div className={styles.fullWidth}>
+                            <label className={styles.label}>Password</label>
+                            <input
+                                className={styles.input}
+                                type="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleInputChange}
+                                placeholder="Enter password"
+                            />
+                            {errors.password && <span className={styles.error}>{errors.password}</span>}
+                        </div>
+                    </div>
+                </div>
+
+                <div className={styles.rightColumn}>
+                    {/* Avatar Upload */}
+                    <div className={styles.section}>
+                        <h3 className={styles.h3}>Avatar</h3>
+                        <div className={styles.imageContainer}>
+                            {imagePreview ? (
+                                <div className={styles.imageWrapper}>
                                     <img
-                                        src={image}
-                                        alt="Uploaded"
+                                        src={imagePreview}
+                                        alt="Preview"
                                         className={styles.uploadedImage}
                                     />
-                                ) : (
-                                    <div className={styles.imageIcon}>
-                                        <img src="https://ecme-react.themenate.net/img/others/upload.png" alt="Upload placeholder" />
-                                    </div>
-                                )}
+                                    <button onClick={removeImage} className={styles.removeImageBtn}>×</button>
+                                </div>
+                            ) : (
+                                <div className={styles.imageIcon}>📷</div>
+                            )}
+                            <label>
                                 <input
                                     type="file"
                                     accept="image/*"
                                     onChange={handleImageChange}
                                     style={{ display: 'none' }}
-                                    id="imageUpload"
                                 />
-                                <button
-                                    type="button"
-                                    className={styles.uploadBtn}
-                                    onClick={() => document.getElementById('imageUpload').click()}
-                                >
-                                    Upload Image
-                                </button>
-                            </div>
-                        </section>
-
-                        <section className={styles.section}>
-                            <h3>Customer Tags</h3>
-                            <select
-                                name="tags"
-                                value={formData.tags}
-                                onChange={handleInputChange}
-                            >
-                                <option value="">Add tags for customer...</option>
-                                <option value="VIP">VIP</option>
-                                <option value="Regular">Regular</option>
-                                <option value="Premium">Premium</option>
-                            </select>
-                        </section>
+                                <span className={styles.uploadBtn}>
+                                    {imagePreview ? 'Change Image' : 'Upload Image'}
+                                </span>
+                            </label>
+                            {errors.avatar && <span className={styles.error}>{errors.avatar}</span>}
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div className={styles.actionButtons}>
+            {/* Action Buttons */}
+            <div className={styles.actionButtons}>
+                <div className={styles.leftActions}>
+                    <span className={styles.back} onClick={() => navigate(-1)}>
+                        <i className="fa-solid fa-arrow-left"></i>
+                        <span> Back</span>
+                    </span>
+                </div>
+                <div className={styles.rightActions}>
                     <button type="button" className={styles.discardBtn} onClick={handleDiscard}>
-                        <span className={styles.icon}>🗑️</span>
+                        <span className={styles.icon}><i className="fa-solid fa-trash-can"></i></span>
                         Discard
                     </button>
-                    <button type="submit" className={styles.createBtn}>
-                        Create
+                    <button
+                        onClick={handleSubmit}
+                        disabled={isSubmitting}
+                        className={`${styles.createBtn} ${isSubmitting ? styles.disabled : ''}`}
+                    >
+                        {isSubmitting ? 'Creating...' : 'Create User'}
                     </button>
                 </div>
-            </form>
+            </div>
         </div>
     );
-};
-
-export default UserCreate;
+}

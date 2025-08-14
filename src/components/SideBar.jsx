@@ -1,7 +1,8 @@
 import React from 'react';
 import styles from '../styles/SideBar.module.scss';
 import { useNavigate, useLocation } from 'react-router-dom';
-import logo from '../assets/img/logo-light-full.png';
+import logoFull from '../assets/img/logo-light-full.png';
+import logoSmall from '../assets/img/logo-light-streamline.png'
 
 export default function Sidebar({ isCollapsed, toggleSidebar }) {
     const navigate = useNavigate();
@@ -98,8 +99,12 @@ export default function Sidebar({ isCollapsed, toggleSidebar }) {
     return (
         <div className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''}`}>
             {/* Logo Section - Fixed */}
-            <div className={styles.logoSection}>
-                <img src={logo} alt="Ecme" className={styles.logo} onClick={() => navigate('/')} />
+            <div className={styles.logoSection} onClick={() => navigate('/')}>
+                <img
+                    src={isCollapsed ? logoSmall : logoFull}
+                    alt="Logo"
+                    className={styles.logo}
+                />
             </div>
 
             {/* Scrollable Content */}

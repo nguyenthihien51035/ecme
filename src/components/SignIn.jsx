@@ -1,15 +1,82 @@
 import React, { useState } from "react";
 import styles from "../styles/SignIn.module.scss";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function SignIn() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPwd, setShowPwd] = useState(false);
+    const [errors, setErrors] = useState({}); // lưu lỗi từng field
+    const [successMsg, setSuccessMsg] = useState("");
+    const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log({ email, password });
+        let newErrors = {};
+        let timeoutID;
+
+        if (!email.trim()) {
+            newErrors.email = "Please enter your email";
+        }
+        if (!password.trim()) {
+            newErrors.password = "Please enter your password";
+        }
+
+        setErrors(newErrors);
+
+        if (Object.keys(newErrors).length > 0) {
+            return;
+        }
+
+        clearTimeout(timeoutID);
+
+        try {
+            const res = await axios.post("http://localhost:8080/api/v1/users/login", {
+                email,
+                password
+            });
+
+            const user = res.data;
+            const userData = res.data.data;
+
+            // Lưu vào localStorage
+            localStorage.setItem("user", JSON.stringify(userData));
+            if (userData.role !== "ADMIN") {
+                setErrors({ account: "You are not allowed to login. Admin only!" });
+                timeoutID = setTimeout(() => {
+                    setErrors((prev) => ({ ...prev, account: "" }));
+                }, 3000);
+                return;
+            }
+
+            setSuccessMsg("Signin successfully!");
+            timeoutID = setTimeout(() => {
+                navigate("/");
+            }, 1000);
+
+        } catch (err) {
+            if (err.response && err.response.data && err.response.data.message) {
+                setErrors({ account: err.response.data.message });
+            } else {
+                setErrors({ account: "Login failed. Please try again!" });
+            }
+            setTimeout(() => {
+                setErrors((prev) => ({ ...prev, account: "" }));
+            }, 3000);
+        }
+    };
+
+    const handleEmailChange = (e) => {
+        setEmail(e.target.value);
+        // Xóa lỗi của riêng field này
+        setErrors((prev) => ({ ...prev, email: "" }));
+    };
+
+    const handlePasswordChange = (e) => {
+        setPassword(e.target.value);
+        // Xóa lỗi của riêng field 
+        setErrors((prev) => ({ ...prev, password: "" }));
     };
 
     return (
@@ -36,6 +103,14 @@ export default function SignIn() {
                                 </p>
                             </div>
 
+                            {/* Lỗi tài khoản sai */}
+                            {errors.account && <p className={styles.errorMsg}>{errors.account}</p>}
+
+                            {/* Thành công */}
+                            {successMsg && <p className={styles.successMsg}>{successMsg}</p>}
+
+
+
                             {/* Form */}
                             <form onSubmit={handleSubmit}>
                                 {/* Email Field */}
@@ -43,12 +118,12 @@ export default function SignIn() {
                                     <label className={styles.label}>Email</label>
                                     <input
                                         type="email"
-                                        className={`form-control ${styles.input}`}
+                                        className={`form-control ${styles.input} ${errors.email ? styles.errorInput : ""}`}
                                         value={email}
                                         placeholder="Email"
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        required
+                                        onChange={handleEmailChange}
                                     />
+                                    {errors.email && <p className={styles.errorMsg}>{errors.email}</p>}
                                 </div>
 
                                 {/* Password Field */}
@@ -57,11 +132,10 @@ export default function SignIn() {
                                     <div className={styles.passwordWrapper}>
                                         <input
                                             type={showPwd ? "text" : "password"}
-                                            className={`form-control ${styles.input} ${styles.passwordInput}`}
+                                            className={`form-control ${styles.input} ${styles.passwordInput} ${errors.password ? styles.errorInput : ""}`}
                                             value={password}
                                             placeholder="Password"
-                                            onChange={(e) => setPassword(e.target.value)}
-                                            required
+                                            onChange={handlePasswordChange}
                                         />
                                         <button
                                             type="button"
@@ -73,6 +147,7 @@ export default function SignIn() {
                                             ></i>
                                         </button>
                                     </div>
+                                    {errors.password && <p className={styles.errorMsg}>{errors.password}</p>}
                                 </div>
 
                                 {/* Forgot Password */}

@@ -111,6 +111,23 @@ $transition: all 0.2s ease;
     position: relative;
 }
 
+.errorMsg {
+    color: red;
+    font-size: 0.85rem;
+    margin-top: 4px;
+}
+
+.successMsg {
+    color: green;
+    font-size: 0.85rem;
+    margin-top: 4px;
+}
+
+.errorInput {
+    border-color: red !important;
+    background-color: #fff5f5 !important;
+}
+
 .passwordInput {
     padding-right: 3rem;
 }

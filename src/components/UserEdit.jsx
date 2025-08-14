@@ -1,23 +1,43 @@
 import React, { useState } from 'react';
 import styles from '../styles/UserEdit.module.scss';
+import { useNavigate } from 'react-router-dom';
 
-const UserEdit = () => {
+export default function UserEdit() {
+    const navigate = useNavigate();
+    const { id } = useParams(); // Lấy id user từ URL
     const [banned, setBanned] = useState(false);
     const [verified, setVerified] = useState(true);
     const [formData, setFormData] = useState({
-        firstName: 'Angelina',
-        userName: 'Gotelli',
-        email: 'carolyn_h@hotmail.com',
-        phone: '121231234',
-        address: '123 Main St',
-        city: 'New York',
-        postalCode: '10001',
+        firstName: "",
+        lastName: "",
+        phone: "",
+        role: "CUSTOMER",
     });
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
+
+    const [image, setImage] = useState(null);
+    const [errors, setErrors] = useState({});
+
+    const handleDiscard = () => {
+        setFormData({
+            firstName: '',
+            userName: '',
+            email: '',
+            phone: '',
+            country: '',
+            address: '',
+            city: '',
+            postalCode: '',
+            tags: '',
+        });
+        setImage(null);
+        setErrors({});
+    };
+
 
     return (
         <div className={styles.container}>
@@ -141,8 +161,24 @@ const UserEdit = () => {
                     </section>
                 </div>
             </div>
+
+            <div className={styles.actionButtons}>
+                <div className={styles.leftActions}>
+                    <span className={styles.back} onClick={() => navigate(-1)}>
+                        <i className="fa-solid fa-arrow-left"></i>
+                        <span> Back</span>
+                    </span>
+                </div>
+                <div className={styles.rightActions}>
+                    <button type="button" className={styles.discardBtn} onClick={handleDiscard}>
+                        <span className={styles.icon}><i className="fa-solid fa-trash-can"></i></span>
+                        Discard
+                    </button>
+                    <button type="submit" className={styles.saveBtn}>
+                        Save
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };
-
-export default UserEdit;

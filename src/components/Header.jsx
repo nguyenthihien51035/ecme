@@ -2,12 +2,19 @@ import React from "react";
 import { useState, useRef, useEffect } from "react";
 import styles from "../styles/Header.module.scss";
 import { useNavigate } from "react-router-dom";
-import menuOpen from '../assets/img/menu.png';
 
 export default function Header({ toggleSidebar, isCollapsed }) {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+
+  const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+
+  // Lấy user từ localStorage
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const avatarUrl = storedUser?.avatarUrl || DEFAULT_AVATAR;
+  const userName = storedUser ? `${storedUser.firstName} ${storedUser.lastName}` : "Guest";
+  const userRole = storedUser?.role || "Visitor";
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -106,26 +113,21 @@ export default function Header({ toggleSidebar, isCollapsed }) {
             className={styles.avatarWrapper}
             onClick={() => toggleDropdown("user")}
           >
-            <img
-              src="https://randomuser.me/api/portraits/men/32.jpg"
-              alt="User Avatar"
-            />
+            <img src={avatarUrl} alt="User Avatar" />
             <span className={styles.statusDot}></span>
           </div>
 
           {activeDropdown === "user" && (
-            <div className={styles.userMenu}>
+            <div className={styles.userMenu} ref={dropdownRef}>
               {/* Header */}
               <div className={styles.userInfo}>
-                <img
-                  src="https://randomuser.me/api/portraits/men/32.jpg"
-                  alt="User"
-                />
+                <img src={avatarUrl} alt="User" />
                 <div>
-                  <div className={styles.userName}>John Doe</div>
-                  <div className={styles.userRole}>Admin</div>
+                  <div className={styles.userName}>{userName}</div>
+                  <div className={styles.userRole}>{userRole}</div>
                 </div>
               </div>
+
 
               {/* Menu Items */}
               <ul className={styles.userList}>
@@ -134,16 +136,6 @@ export default function Header({ toggleSidebar, isCollapsed }) {
                 </li>
                 <li>
                   <i className="fa-solid fa-gear"></i> Settings
-                </li>
-                <li>
-                  <i className="fa-solid fa-file-invoice-dollar"></i> Billing
-                  <span className={styles.badge}>4</span>
-                </li>
-                <li>
-                  <i className="fa-solid fa-dollar-sign"></i> Pricing
-                </li>
-                <li>
-                  <i className="fa-regular fa-circle-question"></i> FAQ
                 </li>
               </ul>
 
