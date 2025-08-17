@@ -20,7 +20,7 @@ export default function LayoutRoot() {
         <Header toggleSidebar={toggleSidebar} isCollapsed={isCollapsed} />
 
         <div className={styles.pageContent}>
-          <Outlet />
+          <Outlet context={{ isCollapsed, toggleSidebar }} />
           <Footer />
         </div>
       </div>

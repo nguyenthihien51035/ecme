@@ -10,6 +10,7 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     height: 60px; // Cố định height
     flex-shrink: 0; // Không cho phép shrink
+    z-index: 1000;
 
     .leftSection {
         display: flex;

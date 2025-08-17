@@ -144,6 +144,23 @@
     width: 100%;
     border-collapse: collapse;
 
+    .statusActive {
+        background-color: oklch(.905 .093 164.15);
+        color: oklch(0.41 0.02 0.14);
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-weight: bold;
+    }
+
+    .statusBlocked {
+        background-color: oklch(.885 .062 18.334);
+        color: oklch(0.41 0.02 0.14);
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-weight: bold;
+    }
+
+
     th {
         i {
             font-size: 11px;
@@ -157,6 +174,8 @@
 
     td {
         vertical-align: middle;
+
+
     }
 }
 

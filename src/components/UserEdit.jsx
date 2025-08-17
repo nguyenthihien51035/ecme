@@ -1,51 +1,76 @@
-import React, { useState } from 'react';
-import styles from '../styles/UserEdit.module.scss';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import styles from "../styles/UserEdit.module.scss";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function UserEdit() {
     const navigate = useNavigate();
     const { id } = useParams(); // Lấy id user từ URL
-    const [banned, setBanned] = useState(false);
-    const [verified, setVerified] = useState(true);
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
         phone: "",
         role: "CUSTOMER",
     });
+    const [errors, setErrors] = useState({});
+
+    // Gọi API lấy thông tin user
+    useEffect(() => {
+        fetch(`http://localhost:8080/api/v1/users/${id}`)
+            .then((res) => res.json())
+            .then((data) => {
+                if (data?.data) {
+                    setFormData({
+                        firstName: data.data.firstName || "",
+                        lastName: data.data.lastName || "",
+                        phone: data.data.phone || "",
+                        role: data.data.role || "CUSTOMER",
+                    });
+                }
+            })
+            .catch((err) => console.error("Lỗi khi load user:", err));
+    }, [id]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
 
-    const [image, setImage] = useState(null);
-    const [errors, setErrors] = useState({});
-
     const handleDiscard = () => {
         setFormData({
-            firstName: '',
-            userName: '',
-            email: '',
-            phone: '',
-            country: '',
-            address: '',
-            city: '',
-            postalCode: '',
-            tags: '',
+            firstName: "",
+            lastName: "",
+            phone: "",
+            role: "CUSTOMER",
         });
-        setImage(null);
         setErrors({});
     };
 
+    const handleSave = () => {
+        fetch(`http://localhost:8080/api/v1/users/${id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+        })
+            .then((res) => {
+                if (!res.ok) throw new Error("Cập nhật thất bại");
+                return res.json();
+            })
+            .then(() => {
+                alert("Cập nhật thành công!");
+                navigate(-1);
+            })
+            .catch((err) => console.error(err));
+    };
 
     return (
         <div className={styles.container}>
-            <h2>Edit user</h2>
+            <h2>Edit customer</h2>
             <div className={styles.mainGrid}>
                 <div className={styles.leftColumn}>
                     <section className={styles.section}>
-                        <h3>Overview</h3>
+                        <h3>User Info</h3>
                         <div className={styles.grid2}>
                             <div>
                                 <label>First Name</label>
@@ -57,106 +82,34 @@ export default function UserEdit() {
                                 />
                             </div>
                             <div>
-                                <label>User Name</label>
+                                <label>Last Name</label>
                                 <input
                                     type="text"
-                                    name="userName"
-                                    value={formData.userName}
+                                    name="lastName"
+                                    value={formData.lastName}
                                     onChange={handleInputChange}
                                 />
                             </div>
-                            <div className={styles.fullWidth}>
-                                <label>Email</label>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleInputChange}
-                                />
-                            </div>
-                            <div className={styles.fullWidth}>
+                            <div>
                                 <label>Phone number</label>
-                                <div className={styles.phoneInput}>
-                                    <span>🇺🇸 +1</span>
-                                    <input
-                                        type="text"
-                                        name="phone"
-                                        value={formData.phone}
-                                        onChange={handleInputChange}
-                                    />
-                                </div>
+                                <input
+                                    type="text"
+                                    name="phone"
+                                    value={formData.phone}
+                                    onChange={handleInputChange}
+                                />
                             </div>
-                        </div>
-                    </section>
-
-                    {/* Address Information */}
-                    <section className={styles.section}>
-                        <h3>Address Information</h3>
-                        <div className={styles.grid2}>
-                            <div className={styles.fullWidth}>
-                                <label>Country</label>
-                                <select>
-                                    <option>🇺🇸 United States</option>
+                            <div>
+                                <label>Role</label>
+                                <select
+                                    name="role"
+                                    value={formData.role}
+                                    onChange={handleInputChange}
+                                >
+                                    <option value="USER">CUSTOMER</option>
+                                    <option value="ADMIN">ADMIN</option>
                                 </select>
                             </div>
-                            <div className={styles.fullWidth}>
-                                <label>Address</label>
-                                <input type="text" value="123 Main St" />
-                            </div>
-                            <div>
-                                <label>City</label>
-                                <input type="text" value="New York" />
-                            </div>
-                            <div>
-                                <label>Postal Code</label>
-                                <input type="text" value="10001" />
-                            </div>
-                        </div>
-                    </section>
-                </div>
-
-                {/* Right Section */}
-                <div className={styles.rightColumn}>
-                    {/* Image */}
-                    <section className={styles.section}>
-                        <h3>Image</h3>
-                        <div className={styles.imageContainer}>
-                            <div className={styles.imageCenter}>
-                                <img
-                                    src="https://randomuser.me/api/portraits/women/75.jpg"
-                                    alt="profile"
-                                />
-                            </div>
-                            <button className={styles.uploadBtn}>Upload Image</button>
-                        </div>
-                    </section>
-
-                    {/* Tags */}
-                    <section className={styles.section}>
-                        <h3>Customer Tags</h3>
-                        <select>
-                            <option>Add tags for customer...</option>
-                        </select>
-                    </section>
-
-                    {/* Account Status */}
-                    <section className={styles.section}>
-                        <h3>Account</h3>
-                        <div className={styles.toggleRow}>
-                            <label>Banned</label>
-                            <input
-                                type="checkbox"
-                                checked={banned}
-                                onChange={() => setBanned(!banned)}
-                            />
-                        </div>
-                        <div className={styles.toggleRow}>
-                            <label>Account Verified</label>
-                            <input
-                                type="checkbox"
-                                checked={verified}
-                                onChange={() => setVerified(!verified)}
-                            />
                         </div>
                     </section>
                 </div>
@@ -170,15 +123,25 @@ export default function UserEdit() {
                     </span>
                 </div>
                 <div className={styles.rightActions}>
-                    <button type="button" className={styles.discardBtn} onClick={handleDiscard}>
-                        <span className={styles.icon}><i className="fa-solid fa-trash-can"></i></span>
+                    <button
+                        type="button"
+                        className={styles.discardBtn}
+                        onClick={handleDiscard}
+                    >
+                        <span className={styles.icon}>
+                            <i className="fa-solid fa-trash-can"></i>
+                        </span>
                         Discard
                     </button>
-                    <button type="submit" className={styles.saveBtn}>
+                    <button
+                        type="submit"
+                        className={styles.saveBtn}
+                        onClick={handleSave}
+                    >
                         Save
                     </button>
                 </div>
             </div>
         </div>
     );
-};
+}

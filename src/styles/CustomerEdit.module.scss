@@ -36,6 +36,7 @@
     border-radius: 16px;
     padding: 24px;
     transition: all 0.2s ease-in-out;
+    margin-bottom: 10px;
     animation: slideInUp 0.6s ease-out;
 }
 
@@ -162,6 +163,7 @@
     right: 0;
     padding: 10px 24px;
     border-top: 1px solid #e5e5e5;
+    transition: left 0.3s ease;
 
     &.collapsed {
         left: 80px; // khi sidebar thu nhỏ
@@ -278,8 +280,7 @@
 
 .error {
     color: #ef4444;
-    font-size: 12px;
-    margin-top: 8px;
+    font-size: 14px;
     display: block;
 }
 
@@ -304,8 +305,6 @@
     color: #737373;
     font-size: 14px;
     letter-spacing: 0.025em;
-
-
 }
 
 .h2 {

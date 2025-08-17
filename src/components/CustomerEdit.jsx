@@ -1,51 +1,26 @@
-import React, { useState } from 'react';
-import styles from '../styles/UserCreate.module.scss';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import styles from '../styles/CustomerEdit.module.scss';
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 import { useOutletContext } from "react-router-dom";
 
-export default function UserCreate() {
+export default function UserEdit() {
     const { isCollapsed } = useOutletContext(); // Lấy state từ LayoutRoot
     const navigate = useNavigate();
+    const { id } = useParams();
     const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        password: ''
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        avatar: "",
+        role: "CUSTOMER",
     });
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
     const [errors, setErrors] = useState({});
     const [apiError, setApiError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-        setErrors({ ...errors, [name]: '' });
-        setApiError('');
-    };
-
-    const handleImageChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            if (file.size > 5 * 1024 * 1024) {
-                setErrors({ ...errors, avatar: 'File size must be less than 5MB' });
-                return;
-            }
-            setImageFile(file);
-            setImagePreview(URL.createObjectURL(file));
-            setErrors({ ...errors, avatar: '' });
-        }
-    };
-
-    const removeImage = () => {
-        setImageFile(null);
-        setImagePreview(null);
-        const input = document.querySelector('input[type="file"]');
-        if (input) input.value = '';
-    };
 
     const validateForm = () => {
         const newErrors = {};
@@ -74,19 +49,71 @@ export default function UserCreate() {
             newErrors.phone = 'Phone number must start with 0 and have exactly 10 digits';
         }
 
-        if (!formData.password) {
-            newErrors.password = 'Password is required';
-        } else if (
-            !/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/
-                .test(formData.password)
-        ) {
-            newErrors.password = 'Password must have at least 6 characters, including uppercase, lowercase, number, and special character';
-        }
-
         return newErrors;
     };
 
-    const handleSubmit = async () => {
+    // Lấy thông tin user để fill form
+    useEffect(() => {
+        axios.get(`http://localhost:8080/api/v1/users/${id}`)
+            .then((res) => {
+                if (res.data?.data) {
+                    const user = res.data.data;
+                    setFormData({
+                        firstName: user.firstName || "",
+                        lastName: user.lastName || "",
+                        email: user.email || "",
+                        phone: user.phone || "",
+                        avatarUrl: user.avatarUrl || "",
+                        role: user.role || "CUSTOMER",
+                    });
+                    if (user.avatarUrl) {
+                        setImagePreview(
+                            user.avatarUrl.startsWith("http")
+                                ? user.avatarUrl
+                                : `http://localhost:8080${user.avatarUrl}`
+                        );
+                    }
+
+                }
+            })
+            .catch((err) => console.error("Lỗi khi load user:", err));
+    }, [id]);
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+        setErrors({ ...errors, [name]: "" });
+    };
+
+    const handleDiscard = () => {
+        if (window.confirm("Bạn có chắc muốn bỏ thay đổi?")) {
+            navigate(-1);
+        }
+    };
+
+    const removeImage = () => {
+        setImageFile(null);
+        setImagePreview(null);
+        setFormData({ ...formData, avatarUrl: "" });
+        const input = document.querySelector('input[type="file"]');
+        if (input) input.value = '';
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                setErrors({ ...errors, avatarUrl: 'File size must be less than 5MB' });
+                return;
+            }
+            setImageFile(file);
+            setImagePreview(URL.createObjectURL(file));
+            setErrors({ ...errors, avatarUrl: '' });
+        }
+    };
+
+    const handleSave = async () => {
+        setApiError('');
         const validationErrors = validateForm();
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
@@ -101,59 +128,34 @@ export default function UserCreate() {
             data.append("lastName", formData.lastName);
             data.append("email", formData.email);
             data.append("phone", formData.phone);
-            data.append("password", formData.password);
+            data.append("role", formData.role);
+
             if (imageFile) {
                 data.append("avatar", imageFile);
+            } else if (!formData.avatarUrl) {
+                // nếu xóa avatar
+                data.append("avatar", "");
             }
 
-            await axios.post(
-                "http://localhost:8080/api/v1/users",
-                data,
-                { headers: { "Content-Type": "multipart/form-data" } }
-            );
-
-            alert('User created successfully!');
-            setFormData({
-                firstName: '',
-                lastName: '',
-                email: '',
-                phone: '',
-                password: ''
+            await axios.put(`http://localhost:8080/api/v1/users/${id}`, data, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
             });
-            removeImage();
-            setErrors({});
-        } catch (error) {
-            if (error.response && error.response.data) {
-                setApiError(error.response.data.message || "Failed to create user. Please try again.");
-            } else {
-                setApiError("Failed to create user. Please try again.");
-            }
+
+            alert("Cập nhật thành công!");
+            navigate(-1);
+        } catch (err) {
+            console.error(err);
+            setApiError(err.response?.data?.message || "Cập nhật thất bại");
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const handleDiscard = () => {
-        if (Object.values(formData).some(value => value.trim()) || imageFile) {
-            if (window.confirm('Are you sure you want to discard all changes?')) {
-                setFormData({
-                    firstName: '',
-                    lastName: '',
-                    email: '',
-                    phone: '',
-                    password: ''
-                });
-                removeImage();
-                setErrors({});
-                setApiError('');
-            }
-        }
-    };
-
     return (
         <div className={styles.container}>
-            <h2 className={styles.h2}>Create customer</h2>
-
+            <h2 className={styles.h2}>Edit customer</h2>
             {apiError && (
                 <div className={`${styles.section} ${styles.errorBox}`}>
                     <span className={styles.error}>{apiError}</span>
@@ -164,7 +166,7 @@ export default function UserCreate() {
                 <div className={styles.leftColumn}>
                     {/* Personal Information */}
                     <div className={styles.section}>
-                        <h3 className={styles.h3}>Personal Information</h3>
+                        <h3 className={styles.h3}>Overview</h3>
                         <div className={styles.grid2}>
                             <div>
                                 <label className={styles.label}>First Name <span style={{ color: 'red' }}>*</span></label>
@@ -173,7 +175,6 @@ export default function UserCreate() {
                                     name="firstName"
                                     value={formData.firstName}
                                     onChange={handleInputChange}
-                                    placeholder="Enter first name"
                                 />
                                 {errors.firstName && <span className={styles.error}>{errors.firstName}</span>}
                             </div>
@@ -184,20 +185,9 @@ export default function UserCreate() {
                                     name="lastName"
                                     value={formData.lastName}
                                     onChange={handleInputChange}
-                                    placeholder="Enter last name"
                                 />
                                 {errors.lastName && <span className={styles.error}>{errors.lastName}</span>}
                             </div>
-                        </div>
-                        <div className={styles.fullWidth}>
-                            <label className={styles.label}>Birth of date <span style={{ color: 'red' }}>*</span></label>
-                            <input
-                                className={styles.input}
-                                name="email"
-                                onChange={handleInputChange}
-                                placeholder="Enter email address"
-                            />
-                            {errors.email && <span className={styles.error}>{errors.email}</span>}
                         </div>
                     </div>
 
@@ -209,8 +199,8 @@ export default function UserCreate() {
                             <input
                                 className={styles.input}
                                 name="email"
+                                value={formData.email}
                                 onChange={handleInputChange}
-                                placeholder="Enter email address"
                             />
                             {errors.email && <span className={styles.error}>{errors.email}</span>}
                         </div>
@@ -222,27 +212,11 @@ export default function UserCreate() {
                                 <input
                                     className={`${styles.input} ${styles.flex1}`}
                                     name="phone"
+                                    value={formData.phone}
                                     onChange={handleInputChange}
-                                    placeholder="Enter phone number"
                                 />
+                                {errors.phone && <span className={styles.error}>{errors.phone}</span>}
                             </div>
-                            {errors.phone && <span className={styles.error}>{errors.phone}</span>}
-                        </div>
-                    </div>
-
-                    {/* Security */}
-                    <div className={styles.section}>
-                        <h3 className={styles.h3}>Security</h3>
-                        <div className={styles.fullWidth}>
-                            <label className={styles.label}>Password <span style={{ color: 'red' }}>*</span></label>
-                            <input
-                                className={styles.input}
-                                type="password"
-                                name="password"
-                                onChange={handleInputChange}
-                                placeholder="Enter password"
-                            />
-                            {errors.password && <span className={styles.error}>{errors.password}</span>}
                         </div>
                     </div>
                 </div>
@@ -275,6 +249,7 @@ export default function UserCreate() {
                                     {imagePreview ? 'Change Image' : 'Upload Image'}
                                 </span>
                             </label>
+                            {errors.avatarUrl && <span className={styles.error}>{errors.avatarUrl}</span>}
                         </div>
                     </div>
                 </div>
@@ -294,11 +269,11 @@ export default function UserCreate() {
                         Discard
                     </button>
                     <button
-                        onClick={handleSubmit}
+                        onClick={handleSave}
                         disabled={isSubmitting}
                         className={`${styles.createBtn} ${isSubmitting ? styles.disabled : ''}`}
                     >
-                        {isSubmitting ? 'Creating...' : 'Create User'}
+                        {isSubmitting ? 'Updating...' : 'Update User'}
                     </button>
                 </div>
             </div>

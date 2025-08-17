@@ -35,20 +35,25 @@ export default function SignIn() {
             const res = await axios.post("http://localhost:8080/api/v1/users/login", {
                 email,
                 password
-            });
+            }, { withCredentials: true });
+            const token = res.data.data;
 
-            const user = res.data;
-            const userData = res.data.data;
 
             // Lưu vào localStorage
-            localStorage.setItem("user", JSON.stringify(userData));
-            if (userData.role !== "ADMIN") {
+            localStorage.setItem("token", token);
+
+            // Giải mã token để lấy role (hoặc gọi API /me để lấy user info)
+            const payload = JSON.parse(atob(token.split(".")[1])); // decode phần payload của JWT
+            const role = payload.role;
+
+            if (role !== "ADMIN") {
                 setErrors({ account: "You are not allowed to login. Admin only!" });
                 timeoutID = setTimeout(() => {
                     setErrors((prev) => ({ ...prev, account: "" }));
                 }, 3000);
                 return;
             }
+
 
             setSuccessMsg("Signin successfully!");
             timeoutID = setTimeout(() => {
@@ -108,8 +113,6 @@ export default function SignIn() {
 
                             {/* Thành công */}
                             {successMsg && <p className={styles.successMsg}>{successMsg}</p>}
-
-
 
                             {/* Form */}
                             <form onSubmit={handleSubmit}>

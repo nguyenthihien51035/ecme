@@ -44,7 +44,38 @@ $transition: all 0.2s ease;
     gap: 10px; // cách đều các thành phần
     width: 100%;
     max-width: 400px;
+
+    // Áp dụng chung cho input và button
+    .input,
+    .signInBtn {
+        width: 100%;
+        box-sizing: border-box; // tránh bị lệch do padding
+    }
 }
+
+.input {
+    background-color: $gray-100;
+    border: none;
+    border-radius: $border-radius;
+    padding: 0.875rem 1rem;
+    font-size: 0.875rem;
+    color: $text-primary;
+    transition: $transition;
+    margin-bottom: 10px; // giảm margin để thẳng hàng
+}
+
+.signInBtn {
+    background-color: $primary-color;
+    border: none;
+    border-radius: $border-radius;
+    padding: 0.875rem 1rem; // chỉnh padding giống input
+    font-weight: 600;
+    color: $white;
+    font-size: 0.875rem;
+    transition: $transition;
+    margin-top: 10px; // thay vì margin dọc lớn
+}
+
 
 // Logo
 .logo {

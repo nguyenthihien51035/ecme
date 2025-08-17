@@ -16,45 +16,6 @@ export default function Sidebar({ isCollapsed, toggleSidebar }) {
             path: '/dashboard'
         },
         {
-            key: 'ecommerce',
-            icon: 'fa-solid fa-shopping-cart',
-            label: 'Ecommerce',
-            path: '/ecommerce'
-        },
-        {
-            key: 'project',
-            icon: 'fa-solid fa-rocket',
-            label: 'Project',
-            path: '/project'
-        },
-        {
-            key: 'marketing',
-            icon: 'fa-solid fa-bullhorn',
-            label: 'Marketing',
-            path: '/marketing'
-        },
-        {
-            key: 'analytic',
-            icon: 'fa-solid fa-chart-bar',
-            label: 'Analytic',
-            path: '/analytic'
-        }
-    ];
-
-    const conceptItems = [
-        {
-            key: 'ai',
-            icon: 'fa-solid fa-atom',
-            label: 'AI',
-            path: '/ai'
-        },
-        {
-            key: 'projects',
-            icon: 'fa-solid fa-building',
-            label: 'Projects',
-            path: '/projects'
-        },
-        {
             key: 'customer',
             icon: 'fa-solid fa-users',
             label: 'Customer',
@@ -83,6 +44,21 @@ export default function Sidebar({ isCollapsed, toggleSidebar }) {
             icon: 'fa-solid fa-question-circle',
             label: 'Help Center',
             path: '/help'
+        },
+    ];
+
+    const conceptItems = [
+        {
+            key: 'ai',
+            icon: 'fa-solid fa-atom',
+            label: 'AI',
+            path: '/ai'
+        },
+        {
+            key: 'projects',
+            icon: 'fa-solid fa-building',
+            label: 'Projects',
+            path: '/projects'
         },
         {
             key: 'calendar',
