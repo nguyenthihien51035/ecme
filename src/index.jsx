@@ -1,55 +1,62 @@
 import React from "react";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import ReactDOM from "react-dom/client";
-import "./index.scss";
-import HomePage from "./HomePage";
-import reportWebVitals from "./reportWebVitals";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import LayoutRoot from "./components/LayoutRoot";
+import { ToastContainer } from "react-toastify";
+
+import "react-toastify/dist/ReactToastify.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import UserDetails from "./components/UserDetails";
-import UserCreate from "./components/UserCreate";
-import SignIn from "./components/SignIn";
-import SignUp from "./components/SignUp";
-import CustomerEdit from "./components/CustomerEdit";
-import UserProfile from "./components/UserProfile";
+import "./index.scss";
+
+import reportWebVitals from "./reportWebVitals";
+
+import AdminLayout from "./layout/AdminLayout";
+import UserLayout from "./layout/UserLayout";
+
+import HomePage from "./components/user/HomePage";
+
+import SignIn from "./components/admin/SignIn";
+import SignUp from "./components/admin/SignUp";
+import UserProfile from "./components/admin/UserProfile";
+import ForgotPassword from "./components/admin/ForgotPassword";
+import ResetPassword from "./components/admin/ResetPassword";
+import CustomerTable from "./components/admin/CustomerTable";
+import CustomerCreate from "./components/admin/CustomerCreate";
+import CustomerEdit from "./components/admin/CustomerEdit";
+import CustomerDetails from "./components/admin/CustomerDetails";
+
 
 const router = createBrowserRouter([
-  {
-    path: "/sign-up",
-    element: <SignUp />,
-  },
-  {
-    path: "/sign-in",
-    element: <SignIn />,
-  },
+  // ================= User =================
   {
     path: "/",
-    element: <LayoutRoot />,
+    element: <UserLayout />,
     children: [
-      {
-        index: true,
-        element: <HomePage />,
-      },
-      {
-        path: "user/view/:id",
-        element: <UserDetails />,
-      },
-      {
-        path: "user/edit/:id",
-        element: <CustomerEdit />,
-      },
-      {
-        path: "user/create",
-        element: <UserCreate />,
-      },
-      {
-        path: "user/my-profile",
-        element: <UserProfile />,
-      },
+      { index: true, element: <HomePage /> },
     ],
   },
+
+  // ================= Admin =================
+  {
+    path: "/admin",
+    element: <AdminLayout />,
+    children: [
+      { index: true, element: <CustomerTable />, },
+      { path: "customer", element: <CustomerTable /> },
+      { path: "customer/create", element: <CustomerCreate /> },
+      { path: "customer/edit/:id", element: <CustomerEdit /> },
+      { path: "customer/view/:id", element: <CustomerDetails /> },
+      { path: "my-profile", element: <UserProfile /> },
+    ],
+  },
+
+  // ================= Auth (không layout) =================
+  { path: "/admin/sign-in", element: <SignIn /> },
+  { path: "/admin/sign-up", element: <SignUp /> },
+  { path: "/admin/forgot-password", element: <ForgotPassword /> },
+  { path: "/admin/reset-password", element: <ResetPassword /> },
+
 ]);
 
 const root = ReactDOM.createRoot(document.getElementById("root"));

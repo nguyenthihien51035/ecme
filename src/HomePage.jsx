@@ -1,6 +1,6 @@
-import UserTable from "./components/UserTable";
+import CustomerTable from "./components/admin/CustomerTable";
 export default function HomePage() {
   return <>
-    <UserTable />
+    <CustomerTable />
   </>;
 }

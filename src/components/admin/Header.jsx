@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import styles from "../styles/Header.module.scss";
+import styles from "../../styles/admin/Header.module.scss";
 import { useNavigate } from "react-router-dom";
 
 export default function Header({ toggleSidebar, isCollapsed }) {
@@ -28,6 +28,7 @@ export default function Header({ toggleSidebar, isCollapsed }) {
   const toggleDropdown = (key) => {
     setActiveDropdown((prev) => (prev === key ? null : key));
   };
+
 
   return (
     <div className={styles.topBar}>
@@ -59,10 +60,10 @@ export default function Header({ toggleSidebar, isCollapsed }) {
                 </div>
               </div>
               <ul className={styles.userList}>
-                <li onClick={() => navigate(`/user/my-profile`)}>
+                <li onClick={() => navigate(`/admin/my-profile`)}>
                   <i className="fa-regular fa-user"></i> My Profile
                 </li>
-                <li onClick={() => navigate(`/user/my-profile`)}>
+                <li onClick={() => navigate(`/admin/my-profile`)}>
                   <i className="fa-solid fa-gear"></i> Settings
                 </li>
               </ul>
@@ -70,7 +71,7 @@ export default function Header({ toggleSidebar, isCollapsed }) {
                 className={styles.logout}
                 onClick={() => {
                   localStorage.clear();
-                  navigate(`/sign-in`);
+                  navigate(`/admin/sign-in`);
                 }}
               >
                 Logout <i className="fa-solid fa-arrow-right-from-bracket"></i>

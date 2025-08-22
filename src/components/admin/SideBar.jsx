@@ -1,8 +1,8 @@
 import React from 'react';
-import styles from '../styles/SideBar.module.scss';
+import styles from '../../styles/admin/SideBar.module.scss';
 import { useNavigate, useLocation } from 'react-router-dom';
-import logoFull from '../assets/img/logo-light-full.png';
-import logoSmall from '../assets/img/logo-light-streamline.png'
+import logoFull from '../../assets/img/logo-light-full.png';
+import logoSmall from '../../assets/img/logo-light-streamline.png'
 
 export default function Sidebar({ isCollapsed, toggleSidebar }) {
     const navigate = useNavigate();
@@ -13,59 +13,59 @@ export default function Sidebar({ isCollapsed, toggleSidebar }) {
             key: 'dashboard',
             icon: 'fa-solid fa-chart-line',
             label: 'DASHBOARD',
-            path: '/dashboard'
+            path: '/admin/dashboard'
         },
         {
             key: 'customer',
             icon: 'fa-solid fa-users',
             label: 'Customer',
-            path: '/'
+            path: '/admin/customer'
         },
-        {
-            key: 'products',
-            icon: 'fa-solid fa-box',
-            label: 'Products',
-            path: '/products'
-        },
-        {
-            key: 'orders',
-            icon: 'fa-solid fa-shopping-cart',
-            label: 'Orders',
-            path: '/orders'
-        },
-        {
-            key: 'account',
-            icon: 'fa-solid fa-user-circle',
-            label: 'Account',
-            path: '/account'
-        },
-        {
-            key: 'help',
-            icon: 'fa-solid fa-question-circle',
-            label: 'Help Center',
-            path: '/help'
-        },
+        // {
+        //     key: 'products',
+        //     icon: 'fa-solid fa-box',
+        //     label: 'Products',
+        //     path: '/products'
+        // },
+        // {
+        //     key: 'orders',
+        //     icon: 'fa-solid fa-shopping-cart',
+        //     label: 'Orders',
+        //     path: '/orders'
+        // },
+        // {
+        //     key: 'account',
+        //     icon: 'fa-solid fa-user-circle',
+        //     label: 'Account',
+        //     path: '/account'
+        // },
+        // {
+        //     key: 'help',
+        //     icon: 'fa-solid fa-question-circle',
+        //     label: 'Help Center',
+        //     path: '/help'
+        // },
     ];
 
     const conceptItems = [
-        {
-            key: 'ai',
-            icon: 'fa-solid fa-atom',
-            label: 'AI',
-            path: '/ai'
-        },
-        {
-            key: 'projects',
-            icon: 'fa-solid fa-building',
-            label: 'Projects',
-            path: '/projects'
-        },
-        {
-            key: 'calendar',
-            icon: 'fa-solid fa-calendar',
-            label: 'Calendar',
-            path: '/calendar'
-        }
+        // {
+        //     key: 'ai',
+        //     icon: 'fa-solid fa-atom',
+        //     label: 'AI',
+        //     path: '/ai'
+        // },
+        // {
+        //     key: 'projects',
+        //     icon: 'fa-solid fa-building',
+        //     label: 'Projects',
+        //     path: '/projects'
+        // },
+        // {
+        //     key: 'calendar',
+        //     icon: 'fa-solid fa-calendar',
+        //     label: 'Calendar',
+        //     path: '/calendar'
+        // }
     ];
 
     const isActiveItem = (path) => {
@@ -75,7 +75,7 @@ export default function Sidebar({ isCollapsed, toggleSidebar }) {
     return (
         <div className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''}`}>
             {/* Logo Section - Fixed */}
-            <div className={styles.logoSection} onClick={() => navigate('/')}>
+            <div className={styles.logoSection} onClick={() => navigate('/admin')}>
                 <img
                     src={isCollapsed ? logoSmall : logoFull}
                     alt="Logo"
@@ -101,7 +101,7 @@ export default function Sidebar({ isCollapsed, toggleSidebar }) {
                 </div>
 
                 {/* Concepts Section */}
-                {!isCollapsed && (
+                {/* {!isCollapsed && (
                     <div className={styles.conceptsHeader}>CONCEPTS</div>
                 )}
 
@@ -117,7 +117,7 @@ export default function Sidebar({ isCollapsed, toggleSidebar }) {
                             {!isCollapsed && <span>{item.label}</span>}
                         </div>
                     ))}
-                </div>
+                </div> */}
             </div>
         </div>
     );

@@ -1,0 +1,454 @@
+.header {
+    background-color: #fff;
+    font-size: 14px;
+    font-family: "Varela Round", sans-serif;
+    position: relative;
+    padding-top: 1rem;
+    padding-bottom: 0;
+
+    .logoImg {
+        height: 50px;
+    }
+
+    .headerLeft {
+        flex: 0 0 auto;
+    }
+
+    .headerMid {
+        flex-grow: 1;
+        margin: 0 2rem;
+
+        .topBar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid #ddd;
+            height: 40px;
+
+            .iconText {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+
+                strong {
+                    font-size: 15px;
+                }
+            }
+
+            .iconCircle {
+                background-color: #000;
+                color: white;
+                border-radius: 50%;
+                width: 22px;
+                height: 22px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+            }
+
+            .search {
+                display: flex;
+                margin-bottom: 5px;
+
+                input {
+                    border: 1px solid #ccc;
+                    border-radius: 4px 0 0 4px;
+                    padding: 5px 10px;
+                    background-color: #eee;
+                    border-right: none;
+                }
+
+                button {
+                    background-color: #eee;
+                    border: 1px solid #ccc;
+                    border-left: none;
+                    border-radius: 0 4px 4px 0;
+                    padding: 5px 10px;
+                }
+            }
+        }
+
+        .nav {
+            ul {
+                display: flex;
+                list-style: none;
+                padding-left: 0;
+                margin-bottom: 0;
+                gap: 1.3rem;
+                justify-content: space-between;
+
+                li {
+                    position: relative;
+
+                    a {
+                        text-decoration: none;
+                        color: #000;
+                        font-weight: 500;
+                        padding-bottom: 5px;
+                        display: inline-block;
+                    }
+
+                    &::after {
+                        content: "";
+                        position: absolute;
+                        bottom: 0;
+                        left: 0;
+                        width: 0%;
+                        height: 2px;
+                        background-color: black;
+                        transition: width 0.3s ease;
+                    }
+
+                    &:hover::after,
+                    &.active::after {
+                        width: 100%;
+                    }
+                }
+
+                .hasMegaMenu {
+                    position: relative;
+
+                    .megaMenu {
+                        position: fixed;
+                        top: 88px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        width: 100%;
+                        max-width: 1120px;
+                        background: #fff;
+                        border-top: 1px solid #eee;
+                        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+                        display: none;
+                        z-index: 999;
+                        padding: 1rem 0;
+                        border-radius: 0 0 8px 8px;
+                        pointer-events: auto; // ngăn việc mất hover khi chuột đang trong menu
+
+
+                        .menuContent {
+                            display: flex;
+                            align-items: flex-start;
+                            justify-content: space-between;
+                            gap: 2rem;
+                        }
+
+                        .leftImage,
+                        .rightImage {
+                            flex-shrink: 0;
+                            width: 180px;
+
+                            img {
+                                width: 100%;
+                                height: 280px;
+                                object-fit: cover;
+                                border-radius: 8px;
+                            }
+                        }
+
+                        .menuCols {
+                            display: grid;
+                            grid-template-columns: repeat(3, 1fr); // 3 cột mỗi hàng
+                            gap: 1rem 2rem;
+                            flex: 1;
+                            max-height: 280px;
+                            overflow-y: auto;
+
+                            &::-webkit-scrollbar {
+                                width: 6px;
+                            }
+
+                            &::-webkit-scrollbar-track {
+                                background: #f1f1f1;
+                                border-radius: 3px;
+                            }
+
+                            &::-webkit-scrollbar-thumb {
+                                background: #c1c1c1;
+                                border-radius: 3px;
+
+                                &:hover {
+                                    background: #a8a8a8;
+                                }
+                            }
+                        }
+
+                        .menuCol {
+                            display: flex;
+                            flex-direction: column;
+
+                            h5 {
+                                font-weight: 600;
+                                margin-bottom: 1rem;
+                                color: #333;
+                                font-size: 14px;
+                                text-transform: uppercase;
+                                border-bottom: 1px solid #eee;
+                                padding-bottom: 0.5rem;
+                            }
+
+                            a {
+                                color: #666;
+                                text-decoration: none;
+                                margin-bottom: 8px;
+                                font-size: 13px;
+                                padding: 2px 0;
+                                transition: all 0.2s ease;
+
+                                &:hover {
+                                    color: #000;
+                                    // cb1c22
+                                    padding-left: 4px;
+                                }
+                            }
+                        }
+                    }
+
+                    &:hover .megaMenu {
+                        display: block;
+                        // animation: fadeIn 0.25s ease;
+                    }
+                }
+
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-10px);
+                    }
+
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                .hasDropdown {
+                    position: relative;
+
+                    a {
+                        display: inline-block;
+                        padding-bottom: 4px;
+                        color: #000;
+                        text-decoration: none;
+                        font-weight: 500;
+                    }
+
+                    .dropdownMenu {
+                        position: absolute;
+                        top: 100%;
+                        left: 0;
+                        min-width: 200px;
+                        background-color: #fff;
+                        border: 1px solid #eee;
+                        border-radius: 6px;
+                        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+                        display: none;
+                        z-index: 999;
+
+                        li {
+                            border-bottom: 1px solid #f1f1f1;
+
+                            a {
+                                display: block;
+                                padding: 10px 15px;
+                                font-size: 13px;
+                                color: #333;
+                                transition: background 0.3s ease;
+
+                                &:hover {
+                                    background-color: #f8f8f8;
+                                    // color: #cb1c22;
+                                }
+                            }
+
+                            &:last-child {
+                                border-bottom: none;
+                            }
+                        }
+                    }
+
+                    &:hover .dropdownMenu {
+                        display: block;
+                    }
+                }
+
+                .sale {
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                    font-weight: bold;
+
+                    img {
+                        height: 20px;
+                        width: 20px;
+                        position: relative;
+                        top: -2px;
+                    }
+                }
+
+                .flashText {
+                    color: red;
+                    animation: colorFlash 2s infinite;
+                }
+
+                @keyframes colorFlash {
+                    0% {
+                        color: rgb(252, 175, 23);
+                    }
+
+                    25% {
+                        color: rgb(232, 4, 45);
+                    }
+
+                    50% {
+                        color: rgb(251, 169, 24);
+                    }
+
+                    75% {
+                        color: rgb(234, 20, 43);
+                    }
+
+                    100% {
+                        color: rgb(250, 159, 25);
+                    }
+                }
+            }
+        }
+    }
+
+    .headerRight {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+
+        .iconGroup {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            font-size: 13px;
+
+            a {
+                text-decoration: none;
+                color: #000;
+            }
+
+            .iconCircle {
+                background-color: #f5f5f5;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+
+                i {
+                    font-size: 18px;
+                }
+            }
+
+            .iconBadge {
+                position: absolute;
+                top: -4px;
+                right: -6px;
+                background: #000;
+                color: white;
+                font-size: 10px;
+                padding: 2px 5px;
+                border-radius: 50%;
+                font-weight: bold;
+            }
+
+            .iconLabel {
+                margin-top: 5px;
+            }
+
+            .accountDropdown {
+                position: absolute;
+                top: 100%;
+                width: 120px;
+                background: #fff;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+                border-radius: 4px;
+                list-style: none;
+                z-index: 10;
+                padding: 0;
+                margin-top: 5px;
+
+                li a {
+                    display: block;
+                    padding: 0.5rem 1rem;
+                    color: #000;
+                    text-decoration: none;
+
+                    &:hover {
+                        background: #000;
+                        color: #fff;
+                        border-radius: 4px;
+                    }
+                }
+
+                &::before {
+                    content: "";
+                    position: absolute;
+                    top: -8px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 0;
+                    height: 0;
+                    border-left: 6px solid transparent;
+                    border-right: 6px solid transparent;
+                    border-bottom: 8px solid #000;
+                    z-index: 11;
+                }
+            }
+        }
+    }
+}
+
+// Responsive
+@media (min-width: 992px) {
+    .header {
+        font-size: 12px;
+    }
+
+    .headerMid .topBar {
+        border-bottom: 1px solid #ddd;
+        display: inline-block;
+        width: auto;
+        position: relative;
+    }
+
+}
+
+@media (max-width: 768px) {
+    .headerMid .topBar {
+        flex-direction: column;
+        align-items: flex-start;
+
+        .search {
+            width: 100%;
+            margin-top: 8px;
+
+            input {
+                width: 100%;
+            }
+        }
+    }
+
+    .headerMid .nav ul {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .headerRight {
+        flex-direction: row;
+    }
+
+    .headerRight .iconLabel {
+        display: none;
+    }
+}

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import styles from "../styles/SignUp.module.scss";
+import styles from "../../styles/admin/SignUp.module.scss";
 import { Link } from "react-router-dom";
 
 export default function SignUp() {
@@ -22,13 +22,13 @@ export default function SignUp() {
                     <div className={`col-lg-6 ${styles.leftSide}`}>
                         <div className={styles.formContainer}>
                             {/* Logo */}
-                            <div >
+                            {/* <div >
                                 <img
                                     className={styles.logo}
-                                    src="https://ecme-react.themenate.net/img/logo/logo-light-streamline.png"
+                                    src="http://bizweb.dktcdn.net/100/462/587/themes/880841/assets/logo.png?1724310613023"
                                     alt=""
                                 />
-                            </div>
+                            </div> */}
 
                             {/* Header */}
                             <div className={styles.header}>
@@ -103,7 +103,7 @@ export default function SignUp() {
                             {/* Sign Up Link */}
                             <div className={styles.signUpLink}>
                                 Already have an account?{" "}
-                                <Link to="/sign-in" className={styles.signUp} href="">Sign in</Link>
+                                <Link to="/admin/sign-in" className={styles.signUp} href="">Sign in</Link>
                             </div>
                         </div>
                     </div>

@@ -1,0 +1,148 @@
+.loading {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #666;
+}
+
+.categorySliderWrapper {
+    position: relative;
+}
+
+.sliderContainer {
+    overflow: hidden;
+    border-radius: 20px;
+}
+
+.sliderTrack {
+    display: flex;
+    gap: 20px;
+    transition: transform 0.5s ease-in-out;
+}
+
+.sliderItem {
+    flex: 0 0 calc(33.333% - 14px); // 3 items per view, accounting for gap
+    min-width: 0;
+}
+
+.card {
+    height: 100%;
+    text-align: center;
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: white;
+
+    &:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+
+        .cardImg {
+            transform: scale(1.05);
+        }
+    }
+}
+
+.cardImg {
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
+    border-radius: 15px 15px 0 0;
+    transition: transform 0.3s ease;
+}
+
+.cardBody {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+    padding: 20px;
+}
+
+.cardTitle {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.carouselControl {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    border: none;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 1;
+        transform: translateY(-50%) scale(1.1);
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+}
+
+.carouselControlPrev {
+    left: -25px;
+}
+
+.carouselControlNext {
+    right: -25px;
+}
+
+.carouselControlIcon {
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.visuallyHidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+    .sliderItem {
+        flex: 0 0 100%; // 1 item per view on mobile
+    }
+
+    .carouselControl {
+        width: 40px;
+        height: 40px;
+    }
+
+    .carouselControlPrev {
+        left: -20px;
+    }
+
+    .carouselControlNext {
+        right: -20px;
+    }
+
+    .carouselControlIcon {
+        font-size: 20px;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .sliderItem {
+        flex: 0 0 calc(50% - 10px); // 2 items per view on tablet
+    }
+}

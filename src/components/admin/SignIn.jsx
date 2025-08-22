@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import styles from "../styles/SignIn.module.scss";
+import styles from "../../styles/admin/SignIn.module.scss";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -32,39 +32,59 @@ export default function SignIn() {
         clearTimeout(timeoutID);
 
         try {
-            const res = await axios.post("http://localhost:8080/api/v1/users/login", {
+            // Gọi API login
+            const loginRes = await axios.post("http://localhost:8080/api/v1/users/login", {
                 email,
                 password
-            }, { withCredentials: true });
-            const token = res.data.data;
+            });
+            const token = loginRes.data.data;
+            console.log("Login token received:", token); // Debug token
+            localStorage.setItem("token", token); // Lưu token vào localStorage
 
+            // Gọi API /me để lấy thông tin người dùng
+            const userRes = await axios.get("http://localhost:8080/api/v1/users/me", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            console.log("User data from /me:", userRes.data); // Debug user data
+            const userData = userRes.data.data; // Giả sử API /me trả về user data trong userRes.data.data
+            localStorage.setItem("user", JSON.stringify(userData)); // Lưu user info vào localStorage
 
-            // Lưu vào localStorage
-            localStorage.setItem("token", token);
-
-            // Giải mã token để lấy role (hoặc gọi API /me để lấy user info)
-            const payload = JSON.parse(atob(token.split(".")[1])); // decode phần payload của JWT
-            const role = payload.role;
-
-            if (role !== "ADMIN") {
+            // Kiểm tra role từ dữ liệu người dùng
+            if (userData.role !== "ADMIN") {
                 setErrors({ account: "You are not allowed to login. Admin only!" });
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
                 timeoutID = setTimeout(() => {
                     setErrors((prev) => ({ ...prev, account: "" }));
                 }, 3000);
                 return;
             }
 
-
             setSuccessMsg("Signin successfully!");
             timeoutID = setTimeout(() => {
-                navigate("/");
+                navigate("/admin");
             }, 1000);
-
         } catch (err) {
-            if (err.response && err.response.data && err.response.data.message) {
-                setErrors({ account: err.response.data.message });
+            console.error("Login error details:", {
+                status: err.response?.status,
+                data: err.response?.data,
+                message: err.message,
+            }); // Debug lỗi chi tiết
+            if (err.response) {
+                switch (err.response.status) {
+                    case 401:
+                        setErrors({ account: "Unauthorized. Please check your credentials!" });
+                        break;
+                    case 403:
+                        setErrors({ account: "Forbidden. " + (err.response.data?.message || "Check CORS, token, or permissions!") });
+                        break;
+                    default:
+                        setErrors({ account: err.response.data?.message || "Login failed. Please try again!" });
+                }
             } else {
-                setErrors({ account: "Login failed. Please try again!" });
+                setErrors({ account: "Network error. Please try again!" });
             }
             setTimeout(() => {
                 setErrors((prev) => ({ ...prev, account: "" }));
@@ -74,13 +94,11 @@ export default function SignIn() {
 
     const handleEmailChange = (e) => {
         setEmail(e.target.value);
-        // Xóa lỗi của riêng field này
         setErrors((prev) => ({ ...prev, email: "" }));
     };
 
     const handlePasswordChange = (e) => {
         setPassword(e.target.value);
-        // Xóa lỗi của riêng field 
         setErrors((prev) => ({ ...prev, password: "" }));
     };
 
@@ -88,35 +106,24 @@ export default function SignIn() {
         <div className={styles.signInWrapper}>
             <div className="container-fluid h-100" style={{ width: "50%" }}>
                 <div className="row h-100">
-                    {/* Left Side - Form */}
                     <div className={`col-lg-6 ${styles.leftSide}`}>
                         <div className={styles.formContainer}>
-                            {/* Logo */}
-                            <div >
+                            {/* <div>
                                 <img
                                     className={styles.logo}
-                                    src="https://ecme-react.themenate.net/img/logo/logo-light-streamline.png"
+                                    src="https://bizweb.dktcdn.net/100/462/587/themes/880841/assets/favicon.png?1724310613023"
                                     alt=""
                                 />
-                            </div>
-
-                            {/* Header */}
+                            </div> */}
                             <div className={styles.header}>
                                 <h1 className={styles.title}>Welcome back!</h1>
                                 <p className={styles.subtitle}>
                                     Please enter your credentials to sign in!
                                 </p>
                             </div>
-
-                            {/* Lỗi tài khoản sai */}
                             {errors.account && <p className={styles.errorMsg}>{errors.account}</p>}
-
-                            {/* Thành công */}
                             {successMsg && <p className={styles.successMsg}>{successMsg}</p>}
-
-                            {/* Form */}
                             <form onSubmit={handleSubmit}>
-                                {/* Email Field */}
                                 <div className="mb-3">
                                     <label className={styles.label}>Email</label>
                                     <input
@@ -128,8 +135,6 @@ export default function SignIn() {
                                     />
                                     {errors.email && <p className={styles.errorMsg}>{errors.email}</p>}
                                 </div>
-
-                                {/* Password Field */}
                                 <div className="mb-3">
                                     <label className={styles.label}>Password</label>
                                     <div className={styles.passwordWrapper}>
@@ -152,15 +157,11 @@ export default function SignIn() {
                                     </div>
                                     {errors.password && <p className={styles.errorMsg}>{errors.password}</p>}
                                 </div>
-
-                                {/* Forgot Password */}
                                 <div className="mb-4">
-                                    <Link to="/forgot-password" className={styles.forgotPassword}>
+                                    <Link to="/admin/forgot-password" className={styles.forgotPassword}>
                                         Forgot password
                                     </Link>
                                 </div>
-
-                                {/* Sign In Button */}
                                 <button
                                     type="submit"
                                     className={`btn w-100 ${styles.signInBtn}`}
@@ -168,13 +169,9 @@ export default function SignIn() {
                                     Sign In
                                 </button>
                             </form>
-
-                            {/* Divider */}
                             <div className={styles.divider}>
                                 <span>or continue with</span>
                             </div>
-
-                            {/* Social Login */}
                             <div className={styles.socialRow}>
                                 <button>
                                     <img style={{ width: "25px" }} src="https://ecme-react.themenate.net/img/others/google.png" alt="" />
@@ -185,15 +182,12 @@ export default function SignIn() {
                                     <span>Github</span>
                                 </button>
                             </div>
-
-                            {/* Sign Up Link */}
                             <div className={styles.signUpLink}>
                                 Don't have an account yet?{" "}
-                                <Link to="/sign-up" className={styles.signUp} href="">Sign up</Link>
+                                <Link to="/admin/sign-up" className={styles.signUp} href="">Sign up</Link>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
             <div className="col-lg-6 d-none d-lg-block">

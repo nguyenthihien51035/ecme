@@ -1,34 +1,65 @@
 import React, { useEffect, useState, useRef } from "react";
-import styles from "../styles/UserTable.module.scss";
+import styles from "../../styles/admin/CustomerTable.module.scss";
 import Pagination from "./Pagination";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import axios from "axios";
 
-const DEFAULT_AVATAR = "https://i.pinimg.com/1200x/20/8c/7e/208c7e8db0901f43c6959553abe0a4d6.jpg";
+const DEFAULT_AVATAR =
+  "https://i.pinimg.com/1200x/20/8c/7e/208c7e8db0901f43c6959553abe0a4d6.jpg";
 
-export default function UserTable() {
-  const [users, setUsers] = useState([]);          // chỉ chứa CUSTOMER đã lọc
+export default function CustomerTable() {
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // state phân trang
+  const [page, setPage] = useState(1); // frontend dùng 1-based
+  const [size, setSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+
+  const [search, setSearch] = useState("");
+
   const [exportOpen, setExportOpen] = useState(false);
   const exportRef = useRef(null);
   const navigate = useNavigate();
 
+  // kiểm tra quyền truy cập
+  useEffect(() => {
+    const userStr = localStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null; //Nếu có thì parse từ JSON string -> object, nếu không thì = null
+
+    if (!user || user.role !== "ADMIN") {
+      alert("You need to login to access the site")
+      // Chưa login hoặc không phải admin
+      navigate("/admin/sign-in");
+    }
+  }, [navigate]);
+
+  // fetch user (có filter, phân trang)
   const fetchUsers = async () => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("http://localhost:8080/api/v1/users");
-      if (!res.ok) throw new Error("Failed to fetch users");
-      const result = await res.json();
+      const token = localStorage.getItem("token");
+      const res = await axios.get("http://localhost:8080/api/v1/users/filter", {
+        headers: { Authorization: `Bearer ${token}` },
+        params: {
+          firstName: search || null,
+          role: "CUSTOMER",
+          page: page - 1, // backend 0-based
+          size,
+        },
+      });
 
-      // Lấy mảng người dùng từ data.content
-      const all = result?.data?.content;
-      const list = Array.isArray(all) ? all : [];
+      const data = res.data?.data;
+      const list = data?.content || [];
 
-      // Lọc chỉ CUSTOMER
-      const customersOnly = list.filter((u) => u.role === "CUSTOMER");
-
-      setUsers(customersOnly);
+      setUsers(list);
+      setTotalPages(data?.totalPages || 0);
+      setTotalElements(data?.totalElements || 0);
     } catch (err) {
       console.error(err);
       setError("Unable to load user list.");
@@ -38,9 +69,19 @@ export default function UserTable() {
     }
   };
 
+  // gọi lại khi page, size, search thay đổi
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [page, size, search]);
+
+  // Auto search với debounce 500ms
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      setPage(1); // reset về trang 1 khi search
+      fetchUsers();
+    }, 500);
+    return () => clearTimeout(delay);
+  }, [search]);
 
   // Đóng dropdown khi click ra ngoài
   useEffect(() => {
@@ -53,13 +94,29 @@ export default function UserTable() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`http://localhost:8080/api/v1/users/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setUsers((prev) => prev.filter((u) => u.id !== id));
+      toast.success("User disabled successfully!");
+      fetchUsers();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Delete failure");
+    }
+  };
+
   return (
     <>
       <div className={styles.wrapper}>
         <div className={styles.controls}>
           <h2>Customer</h2>
           <div className={styles.actions}>
-            {/* Export Button */}
             <div className={styles.exportDropdown} ref={exportRef}>
               <button
                 className={styles.export}
@@ -68,10 +125,9 @@ export default function UserTable() {
                 <i className="fa-solid fa-cloud-arrow-down"></i> Download
               </button>
             </div>
-
             <button
               className={styles.addCustomer}
-              onClick={() => navigate(`/user/create`)}
+              onClick={() => navigate(`/admin/customer/create`)}
             >
               <i className="fa-solid fa-user-plus"></i> Add User
             </button>
@@ -84,7 +140,8 @@ export default function UserTable() {
               type="text"
               placeholder="Quick search..."
               className={styles.searchInput}
-            // TODO: bạn có thể thêm state và filter client-side tại đây
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
             <span className={styles.searchIcon}>
               <i className="fa-solid fa-magnifying-glass"></i>
@@ -97,20 +154,18 @@ export default function UserTable() {
 
         {/* Loading / Error / Empty */}
         {loading && <div className={styles.stateMsg}>Loading...</div>}
-        {!loading && error && <div className={styles.stateError}>{error}</div>}
+        {!loading && error && (
+          <div className={styles.stateError}>{error}</div>
+        )}
         {!loading && !error && users.length === 0 && (
-          <div className={styles.stateMsg}>
-            There are no CUSTOMER users.
-          </div>
+          <div className={styles.stateMsg}>There are no CUSTOMER users.</div>
         )}
 
         {!loading && !error && users.length > 0 && (
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>
-                  <input type="checkbox" />
-                </th>
+                <th>ID</th>
                 <th>Full Name</th>
                 <th>Email</th>
                 <th>Phone</th>
@@ -122,7 +177,7 @@ export default function UserTable() {
               {users.map((u) => (
                 <tr key={u.id}>
                   <td>
-                    <input type="checkbox" />
+                    #{u.id}
                   </td>
                   <td className={styles.customer}>
                     <img
@@ -136,25 +191,30 @@ export default function UserTable() {
                   </td>
                   <td>{u.email}</td>
                   <td>{u.phone}</td>
-                  <td >
-                    <span className={u.active ? styles.statusActive : styles.statusBlocked}>
-                      {u.active ? 'Active' : 'Blocked'}</span>
+                  <td>
+                    <span
+                      className={
+                        u.active ? styles.statusActive : styles.statusBlocked
+                      }
+                    >
+                      {u.active ? "Active" : "Blocked"}
+                    </span>
                   </td>
                   <td className={styles.actionIcon}>
                     <i
                       className="fa-solid fa-pen-to-square"
                       title="Edit"
-                      onClick={() => navigate(`/user/edit/${u.id}`)}
+                      onClick={() => navigate(`/admin/customer/edit/${u.id}`)}
                     />
                     <i
                       className="fa-solid fa-eye"
                       title="View"
-                      onClick={() => navigate(`/user/view/${u.id}`)}
+                      onClick={() => navigate(`/admin/customer/view/${u.id}`)}
                     />
                     <i
                       className="fa-solid fa-trash-can"
-                      title="Delete"
-                    // TODO: gắn hàm xóa nếu cần
+                      title="Deactivate user"
+                      onClick={() => handleDelete(u.id)}
                     />
                   </td>
                 </tr>
@@ -163,7 +223,19 @@ export default function UserTable() {
           </table>
         )}
       </div>
-      <Pagination />
+
+      {/* Pagination */}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        pageSize={size}
+        totalElements={totalElements}
+        onPageChange={(p) => setPage(p)}
+        onPageSizeChange={(s) => {
+          setSize(s);
+          setPage(1);
+        }}
+      />
     </>
   );
 }

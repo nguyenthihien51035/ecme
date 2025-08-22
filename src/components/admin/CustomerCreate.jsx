@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import styles from '../styles/UserCreate.module.scss';
+import styles from '../../styles/admin/CustomerCreate.module.scss';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useOutletContext } from "react-router-dom";
 
-export default function UserCreate() {
+export default function CustomerCreate() {
     const { isCollapsed } = useOutletContext(); // Lấy state từ LayoutRoot
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
@@ -109,7 +109,12 @@ export default function UserCreate() {
             await axios.post(
                 "http://localhost:8080/api/v1/users",
                 data,
-                { headers: { "Content-Type": "multipart/form-data" } }
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                        "Authorization": `Bearer ${localStorage.getItem("token")}`
+                    }
+                }
             );
 
             alert('User created successfully!');
@@ -188,16 +193,6 @@ export default function UserCreate() {
                                 />
                                 {errors.lastName && <span className={styles.error}>{errors.lastName}</span>}
                             </div>
-                        </div>
-                        <div className={styles.fullWidth}>
-                            <label className={styles.label}>Birth of date <span style={{ color: 'red' }}>*</span></label>
-                            <input
-                                className={styles.input}
-                                name="email"
-                                onChange={handleInputChange}
-                                placeholder="Enter email address"
-                            />
-                            {errors.email && <span className={styles.error}>{errors.email}</span>}
                         </div>
                     </div>
 

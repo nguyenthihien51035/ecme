@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { User, Shield, Eye, EyeOff, Upload, X } from 'lucide-react';
-import styles from "../styles/UserProfile.module.scss";
+import styles from "../../styles/admin/UserProfile.module.scss";
 import axios from 'axios';
 import { toast } from "react-toastify";
 
@@ -63,7 +63,7 @@ export default function ProfileSettings() {
                 }
             } catch (error) {
                 console.error("Failed to fetch user:", error);
-                toast.error("Không lấy được thông tin người dùng");
+                toast.error("Unable to get user information");
             } finally {
                 setIsLoading(false);
             }
@@ -120,39 +120,55 @@ export default function ProfileSettings() {
     const handleSave = async () => {
         if (!validateProfile()) return;
         setIsLoading(true);
+
         try {
+            const formData = new FormData();
+            formData.append("firstName", profileData.firstName);
+            formData.append("lastName", profileData.lastName);
+            formData.append("phone", profileData.phone);
+
+            if (imageFile) {
+                formData.append("avatar", imageFile);
+            } else {
+                formData.append("removeAvatar", true); // hoặc false tùy trường hợp
+            }
+
             const res = await axios.put(
                 "http://localhost:8080/api/v1/users/profile",
-                {
-                    firstName: profileData.firstName,
-                    lastName: profileData.lastName,
-                    phone: profileData.phone,
-                },
+                formData,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
+                        "Content-Type": "multipart/form-data",
                     },
                 }
             );
 
-            toast.success("Cập nhật hồ sơ thành công!");
+            toast.success("Update successfully!");
             setProfileData(res.data.data);
+            localStorage.setItem("user", JSON.stringify(res.data.data));
+
         } catch (error) {
             console.error(error);
-            toast.error(error.response?.data?.message || "Cập nhật thất bại, thử lại sau!");
+            toast.error(error.response?.data?.message || "Update fail, try again!");
         } finally {
             setIsLoading(false);
         }
     };
 
+
     const handleUpdatePassword = async () => {
         const newErrors = {};
         if (!passwordData.currentPassword) newErrors.currentPassword = 'Current password is required';
+
+        const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
         if (!passwordData.newPassword) {
             newErrors.newPassword = 'New password is required';
-        } else if (passwordData.newPassword.length < 8) {
-            newErrors.newPassword = 'Password must be at least 8 characters';
+        } else if (!passwordRegex.test(passwordData.newPassword)) {
+            newErrors.newPassword =
+                'Password must be at least 6 chars, include uppercase, lowercase, number & special char';
         }
+
         if (!passwordData.confirmPassword) {
             newErrors.confirmPassword = 'Please confirm your password';
         } else if (passwordData.newPassword !== passwordData.confirmPassword) {
@@ -167,17 +183,18 @@ export default function ProfileSettings() {
             const res = await axios.put(
                 "http://localhost:8080/api/v1/users/change-password",
                 {
-                    currentPassword: passwordData.currentPassword,
+                    oldPassword: passwordData.currentPassword,
                     newPassword: passwordData.newPassword,
                 },
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
                     },
                 }
             );
 
-            toast.success(res.data.message || "Đổi mật khẩu thành công!");
+            toast.success(res.data.message || "Change password sucessful!");
             setPasswordData({
                 currentPassword: '',
                 newPassword: '',
@@ -185,7 +202,7 @@ export default function ProfileSettings() {
             });
         } catch (error) {
             console.error(error);
-            toast.error(error.response?.data?.message || "Đổi mật khẩu thất bại!");
+            toast.error(error.response?.data?.message || "Change password failed!");
         } finally {
             setIsLoading(false);
         }
@@ -355,10 +372,10 @@ export default function ProfileSettings() {
                             <div className={styles.passwordHint}>
                                 <p>Password must contain:</p>
                                 <ul>
-                                    <li>At least 8 characters</li>
+                                    <li>At least 6 characters</li>
                                     <li>At least one uppercase letter</li>
                                     <li>At least one lowercase letter</li>
-                                    <li>At least one number</li>
+                                    <li>At least one special characters</li>
                                 </ul>
                             </div>
 

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
-import styles from '../styles/CustomerEdit.module.scss';
+import styles from '../../styles/admin/CustomerEdit.module.scss';
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { useOutletContext } from "react-router-dom";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-export default function UserEdit() {
+export default function CustomerEdit() {
     const { isCollapsed } = useOutletContext(); // Lấy state từ LayoutRoot
     const navigate = useNavigate();
     const { id } = useParams();
@@ -13,8 +15,9 @@ export default function UserEdit() {
         lastName: "",
         email: "",
         phone: "",
-        avatar: "",
+        avatarUrl: "",
         role: "CUSTOMER",
+        active: true, // mặc định active
     });
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
@@ -52,10 +55,16 @@ export default function UserEdit() {
         return newErrors;
     };
 
-    // Lấy thông tin user để fill form
     useEffect(() => {
-        axios.get(`http://localhost:8080/api/v1/users/${id}`)
-            .then((res) => {
+        const fetchUser = async () => {
+            try {
+                const token = localStorage.getItem("token"); // token admin
+                const res = await axios.get(`http://localhost:8080/api/v1/users/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+
                 if (res.data?.data) {
                     const user = res.data.data;
                     setFormData({
@@ -65,7 +74,9 @@ export default function UserEdit() {
                         phone: user.phone || "",
                         avatarUrl: user.avatarUrl || "",
                         role: user.role || "CUSTOMER",
+                        active: user.active ?? true,
                     });
+
                     if (user.avatarUrl) {
                         setImagePreview(
                             user.avatarUrl.startsWith("http")
@@ -73,10 +84,13 @@ export default function UserEdit() {
                                 : `http://localhost:8080${user.avatarUrl}`
                         );
                     }
-
                 }
-            })
-            .catch((err) => console.error("Lỗi khi load user:", err));
+            } catch (err) {
+                console.error("Lỗi khi load user:", err);
+            }
+        };
+
+        fetchUser();
     }, [id]);
 
     const handleInputChange = (e) => {
@@ -86,7 +100,7 @@ export default function UserEdit() {
     };
 
     const handleDiscard = () => {
-        if (window.confirm("Bạn có chắc muốn bỏ thay đổi?")) {
+        if (window.confirm("Are you sure you want to abandon the changes?")) {
             navigate(-1);
         }
     };
@@ -94,10 +108,11 @@ export default function UserEdit() {
     const removeImage = () => {
         setImageFile(null);
         setImagePreview(null);
-        setFormData({ ...formData, avatarUrl: "" });
+        setFormData({ ...formData, avatarUrl: "", removeAvatar: true })
         const input = document.querySelector('input[type="file"]');
         if (input) input.value = '';
     };
+
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -113,6 +128,7 @@ export default function UserEdit() {
     };
 
     const handleSave = async () => {
+        const token = localStorage.getItem("token");
         setApiError('');
         const validationErrors = validateForm();
         if (Object.keys(validationErrors).length > 0) {
@@ -129,25 +145,26 @@ export default function UserEdit() {
             data.append("email", formData.email);
             data.append("phone", formData.phone);
             data.append("role", formData.role);
+            data.append("active", formData.active);
 
             if (imageFile) {
                 data.append("avatar", imageFile);
-            } else if (!formData.avatarUrl) {
-                // nếu xóa avatar
-                data.append("avatar", "");
+            } else if (formData.removeAvatar) {
+                data.append("removeAvatar", "true");
             }
 
             await axios.put(`http://localhost:8080/api/v1/users/${id}`, data, {
                 headers: {
                     "Content-Type": "multipart/form-data",
+                    Authorization: `Bearer ${token}`
                 },
             });
 
-            alert("Cập nhật thành công!");
+            toast.success("Update successfully!");
             navigate(-1);
         } catch (err) {
             console.error(err);
-            setApiError(err.response?.data?.message || "Cập nhật thất bại");
+            toast.error(err.response?.data?.message || "Update failed!");
         } finally {
             setIsSubmitting(false);
         }
@@ -217,6 +234,21 @@ export default function UserEdit() {
                                 />
                                 {errors.phone && <span className={styles.error}>{errors.phone}</span>}
                             </div>
+                        </div>
+                        {/* Status */}
+                        <div className={styles.fullWidth}>
+                            <label className={styles.label}>Status</label>
+                            <select
+                                name="active"
+                                value={formData.active ? "true" : "false"}
+                                onChange={(e) =>
+                                    setFormData({ ...formData, active: e.target.value === "true" })
+                                }
+                                className={styles.input}
+                            >
+                                <option value="true" style={{ borderRadius: '10px' }}>Active</option>
+                                <option value="false">Blocked</option>
+                            </select>
                         </div>
                     </div>
                 </div>
