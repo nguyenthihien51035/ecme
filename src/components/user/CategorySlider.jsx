@@ -1,9 +1,15 @@
 import React, { useEffect, useState } from "react";
 import styles from "../../styles/user/CategorySlider.module.scss";
+import { useNavigate } from "react-router-dom";
 
 export default function CategorySlider() {
     const [categories, setCategories] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const navigate = useNavigate();
+
+    const handleCategoryClick = (id) => {
+        navigate(`/products/category/${id}`)
+    }
 
     useEffect(() => {
         fetch("http://localhost:8080/api/v1/categories")
@@ -24,7 +30,6 @@ export default function CategorySlider() {
         if (categories.length <= 3) return;
         setCurrentIndex((prev) => (prev - 1 + categories.length) % categories.length);
     };
-
 
 
     // Tạo mảng để hiển thị 3 items liên tiếp (circular)
@@ -64,8 +69,8 @@ export default function CategorySlider() {
                 {/* Main slider container */}
                 <div className={styles.sliderContainer}>
                     <div className={styles.sliderTrack}>
-                        {visibleCategories.map((cate, index) => (
-                            <div key={`${cate.id}-${currentIndex}-${index}`} className={styles.sliderItem}>
+                        {visibleCategories.map((cate) => (
+                            <div key={cate.id} className={styles.sliderItem} onClick={() => handleCategoryClick(cate.id)}>
                                 <div className={styles.card}>
                                     <img
                                         src={cate.image}
@@ -78,6 +83,7 @@ export default function CategorySlider() {
                                 </div>
                             </div>
                         ))}
+
                     </div>
                 </div>
 
