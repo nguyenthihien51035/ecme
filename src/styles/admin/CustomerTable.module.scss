@@ -21,29 +21,61 @@
     width: 200px;
 }
 
-.actionIcon i {
-    display: inline-block;
-    /* Giữ các icon trên cùng một hàng */
-    margin-right: 12px;
-    vertical-align: middle;
-    cursor: pointer;
-}
-
-.actionIcon i:last-child {
-    margin-right: 0;
-}
-
 .actionIcon {
     text-align: center;
+    display: flex;
+    gap: 4px;
 }
 
+.actionIcon i {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    margin-right: 0;
+    /* Reset margin */
+}
 
+/* Styling cho từng loại action */
+.actionIcon .fa-pen-to-square {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.actionIcon .fa-pen-to-square:hover {
+    background: #fde68a;
+}
+
+.actionIcon .fa-eye {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.actionIcon .fa-eye:hover {
+    background: #bfdbfe;
+}
+
+.actionIcon .fa-trash-can {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.actionIcon .fa-trash-can:hover {
+    background: #fecaca;
+}
+
+/* Giữ lại CSS cho .actions */
 .actions {
     display: flex;
     gap: 10px;
     align-items: center;
 
-    // Đồng bộ chiều cao
+    /* Đồng bộ chiều cao */
     select,
     .export,
     .addCustomer {
@@ -79,6 +111,45 @@
         color: white;
         border: none;
         cursor: pointer;
+    }
+}
+
+.actionButton {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+
+    &.viewButton {
+        background: #dbeafe;
+        color: #1e40af;
+
+        &:hover {
+            background: #bfdbfe;
+        }
+    }
+
+    &.editButton {
+        background: #fef3c7;
+        color: #d97706;
+
+        &:hover {
+            background: #fde68a;
+        }
+    }
+
+    &.deleteButton {
+        background: #fee2e2;
+        color: #dc2626;
+
+        &:hover {
+            background: #fecaca;
+        }
     }
 }
 

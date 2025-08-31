@@ -38,7 +38,7 @@ export default function ForgotPassword() {
         <div className={styles.signInWrapper}>
             <div className="container-fluid h-100" style={{ width: "50%" }}>
                 <div className="row h-100">
-                    <div className={`col-lg-6 ${styles.leftSide}`}>
+                    <div className={styles.leftSide}>
                         <div className={styles.formContainer}>
 
                             <div className={styles.header}>
@@ -76,7 +76,7 @@ export default function ForgotPassword() {
             </div>
 
             {/* Ảnh bên phải */}
-            <div className="col-lg-6 d-none d-lg-block">
+            <div className="d-none d-lg-block">
                 <img
                     style={{
                         width: "500px",

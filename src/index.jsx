@@ -25,7 +25,9 @@ import CustomerTable from "./components/admin/CustomerTable";
 import CustomerCreate from "./components/admin/CustomerCreate";
 import CustomerEdit from "./components/admin/CustomerEdit";
 import CustomerDetails from "./components/admin/CustomerDetails";
-
+import ProductCreate from "./components/admin/ProductCreate";
+import ProductTable from "./components/admin/ProductTable";
+import ProductEdit from "./components/admin/ProductEdit";
 
 const router = createBrowserRouter([
   // ================= User =================
@@ -43,11 +45,16 @@ const router = createBrowserRouter([
     element: <AdminLayout />,
     children: [
       { index: true, element: <CustomerTable />, },
-      { path: "customer", element: <CustomerTable /> },
+      { path: "customer/list", element: <CustomerTable /> },
       { path: "customer/create", element: <CustomerCreate /> },
       { path: "customer/edit/:id", element: <CustomerEdit /> },
       { path: "customer/view/:id", element: <CustomerDetails /> },
       { path: "my-profile", element: <UserProfile /> },
+      { path: "products", element: <ProductTable /> },
+      { path: "products/list", element: <ProductTable /> },
+      { path: "products/create", element: <ProductCreate /> },
+      { path: "products/edit/:productId", element: <ProductEdit /> },
+
     ],
   },
 

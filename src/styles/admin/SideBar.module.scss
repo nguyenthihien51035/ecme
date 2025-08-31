@@ -16,10 +16,10 @@
         width: 80px;
 
         .logo {
-            left: -8px;
+            left: 8px;
             position: absolute;
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 56px;
         }
     }
 }
@@ -38,11 +38,11 @@
     transition: background 0.3s ease; // Thêm transition
 
     &:hover {
-        background: rgba(255, 255, 255, 0.05); // Hover effect
+        background: rgba(0, 0, 0, 0.05); // Hover effect cho light theme
     }
 
     .logo {
-        padding: 20px;
+        padding: 5px;
         align-items: center;
         width: 100px;
         height: 46px;
@@ -66,17 +66,17 @@
     }
 
     &::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.2);
+        background: rgba(0, 0, 0, 0.2);
         border-radius: 3px;
 
         &:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.3);
         }
     }
 
     // Firefox scrollbar
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 }
 
 .menuSection {}
@@ -90,7 +90,7 @@
     position: relative;
 
     &:hover {
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.05);
     }
 
     &.categoryHeader {
@@ -99,7 +99,8 @@
     }
 
     &.active {
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(0, 123, 255, 0.1);
+        color: #007bff;
 
         &::after {
             content: '';
@@ -109,6 +110,19 @@
             bottom: 0;
             width: 3px;
             background: #007bff;
+        }
+    }
+
+    // Style cho menu item có dropdown khi được mở
+    &.hasDropdown {
+        &.expanded {
+            background: #e3f2fd;
+            color: #007bff;
+
+            .dropdownArrow {
+                color: #007bff;
+                transform: rotate(180deg);
+            }
         }
     }
 
@@ -129,6 +143,75 @@
     .sidebar.collapsed & span {
         opacity: 0;
         pointer-events: none;
+    }
+}
+
+// CSS cho submenu dropdown
+.dropdownArrow {
+    margin-left: auto;
+    font-size: 12px;
+    transition: transform 0.2s ease;
+    color: #737373;
+}
+
+.submenu {
+    background-color: transparent;
+    margin-left: 0;
+    animation: slideDown 0.2s ease-out;
+    overflow: hidden;
+}
+
+.submenuItem {
+    padding: 12px 20px 12px 50px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    color: #666;
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    &::before {
+        content: '•';
+        position: absolute;
+        left: 35px;
+        color: #ccc;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    &:hover {
+        background-color: #f5f5f5;
+        color: #333;
+        font-weight: 600;
+    }
+
+    &.active {
+        background-color: transparent;
+        color: #007bff;
+        font-weight: 500;
+
+        &::before {
+            color: #007bff;
+        }
+    }
+
+    span {
+        display: block;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    to {
+        opacity: 1;
+        max-height: 200px;
     }
 }
 
@@ -157,11 +240,12 @@
     position: relative;
 
     &:hover {
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.05);
     }
 
     &.active {
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(0, 123, 255, 0.1);
+        color: #007bff;
 
         &::after {
             content: '';

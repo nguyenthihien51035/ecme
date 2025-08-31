@@ -106,7 +106,7 @@ export default function SignIn() {
         <div className={styles.signInWrapper}>
             <div className="container-fluid h-100" style={{ width: "50%" }}>
                 <div className="row h-100">
-                    <div className={`col-lg-6 ${styles.leftSide}`}>
+                    <div className={styles.leftSide}>
                         <div className={styles.formContainer}>
                             {/* <div>
                                 <img
@@ -190,7 +190,7 @@ export default function SignIn() {
                     </div>
                 </div>
             </div>
-            <div className="col-lg-6 d-none d-lg-block">
+            <div className="d-none d-lg-block">
                 <img style={{
                     width: "500px",
                     height: "100%",
