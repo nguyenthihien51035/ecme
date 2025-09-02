@@ -159,7 +159,7 @@ const ProductList = () => {
     };
 
     const handleView = (productId) => {
-        navigate(`/admin/products/${productId}`);
+        navigate(`/admin/products/view/${productId}`);
     };
 
     const handleEdit = (productId) => {

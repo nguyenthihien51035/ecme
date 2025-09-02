@@ -28,6 +28,7 @@ import CustomerDetails from "./components/admin/CustomerDetails";
 import ProductCreate from "./components/admin/ProductCreate";
 import ProductTable from "./components/admin/ProductTable";
 import ProductEdit from "./components/admin/ProductEdit";
+import ProductDetails from "./components/admin/ProductDetails";
 
 const router = createBrowserRouter([
   // ================= User =================
@@ -54,6 +55,7 @@ const router = createBrowserRouter([
       { path: "products/list", element: <ProductTable /> },
       { path: "products/create", element: <ProductCreate /> },
       { path: "products/edit/:productId", element: <ProductEdit /> },
+      { path: "products/view/:id", element: <ProductDetails /> },
 
     ],
   },
