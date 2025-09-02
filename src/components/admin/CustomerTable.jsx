@@ -201,22 +201,29 @@ export default function CustomerTable() {
                     </span>
                   </td>
                   <td className={styles.actionIcon}>
-                    <i
-                      className={`${styles.actionButton} ${styles.editButton} fa-solid fa-pen-to-square`}
+                    <button
+                      className={`${styles.actionButton} ${styles.editButton}`}
                       title="Edit"
                       onClick={() => navigate(`/admin/customer/edit/${u.id}`)}
-                    />
-                    <i
-                      className={`${styles.actionButton} ${styles.viewButton} fa-solid fa-eye`}
+                    >
+                      <i className="fa-solid fa-pen-to-square" />
+                    </button>
 
+                    <button
+                      className={`${styles.actionButton} ${styles.viewButton}`}
                       title="View"
                       onClick={() => navigate(`/admin/customer/view/${u.id}`)}
-                    />
-                    <i
-                      className={`${styles.actionButton} ${styles.deleteButton} fa-solid fa-trash-can`}
+                    >
+                      <i className="fa-solid fa-eye" />
+                    </button>
+
+                    <button
+                      className={`${styles.actionButton} ${styles.deleteButton}`}
                       title="Deactivate user"
                       onClick={() => handleDelete(u.id)}
-                    />
+                    >
+                      <i className="fa-solid fa-trash-can" />
+                    </button>
                   </td>
                 </tr>
               ))}

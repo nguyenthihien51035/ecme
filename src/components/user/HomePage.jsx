@@ -1,8 +1,10 @@
+import React from 'react';
 import '../../styles/user/HomePage.module.scss';
 import Slider from '../../components/user/Slider';
 import Promotion from '../../components/user/Promotion';
 import CategorySlider from "../../components/user/CategorySlider";
-
+import ProductSection from '../../components/user/ProductSection';
+import Footer from '../user/Footer';
 
 function HomePage() {
   return (
@@ -10,10 +12,8 @@ function HomePage() {
       <Slider />
       <Promotion />
       <CategorySlider />
-      <main className="container mt-4">
-        <h2>Welcome to Rubies Fashion!</h2>
-      </main>
-
+      <ProductSection />
+      <Footer />
     </>
   );
 }

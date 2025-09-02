@@ -29,6 +29,7 @@ import ProductCreate from "./components/admin/ProductCreate";
 import ProductTable from "./components/admin/ProductTable";
 import ProductEdit from "./components/admin/ProductEdit";
 import ProductDetails from "./components/admin/ProductDetails";
+import ProductsPage from "./components/user/ProductSearch";
 
 const router = createBrowserRouter([
   // ================= User =================
@@ -37,6 +38,7 @@ const router = createBrowserRouter([
     element: <UserLayout />,
     children: [
       { index: true, element: <HomePage /> },
+      { path: "products", element: <ProductsPage /> },
     ],
   },
 

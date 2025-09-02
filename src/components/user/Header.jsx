@@ -1,12 +1,21 @@
 import styles from "../../styles/user/Header.module.scss";
 import logo from "../../assets/img/logo.png";
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function Header() {
+  const navigate = useNavigate();
   const [showAccount, setShowAccount] = useState(false);
   const location = useLocation();
   const currentPath = location.pathname;
+  const [searchText, setSearchText] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+
+  const handleSearch = async () => {
+    if (!searchText.trim()) return;
+    navigate(`/products?search=${encodeURIComponent(searchText)}`);
+  };
 
   return (
     <header className={styles.header}>
@@ -36,12 +45,35 @@ export default function Header() {
               HỆ THỐNG CỬA HÀNG
             </span>
             <div className={styles.search}>
-              <input type="text" placeholder="Tìm sản phẩm..." />
-              <button>
+              <input
+                type="text"
+                placeholder="Tìm sản phẩm..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch();
+                  }
+                }}
+              />
+              <button onClick={handleSearch}>
                 <i className="fas fa-search" />
               </button>
             </div>
+
           </div>
+          {/* Nếu muốn hiển thị kết quả ngay dưới ô tìm kiếm */}
+          {searchResults.length > 0 && (
+            <div className={styles.searchResults}>
+              <ul>
+                {searchResults.map(product => (
+                  <li key={product.id}>
+                    <Link to={`/products/${product.id}`}>{product.name}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <nav className={styles.nav}>
             <ul>

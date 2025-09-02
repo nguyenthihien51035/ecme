@@ -1,0 +1,179 @@
+.footerContainer {
+    background: #000;
+    color: #fff;
+    padding: 20px 0;
+}
+
+.topSection {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.contentWrapper {
+    display: grid;
+    grid-template-columns: 2fr 1fr 2fr 1.5fr;
+    gap: 40px;
+    margin-bottom: 30px;
+}
+
+.companyColumn {
+    h2 {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        letter-spacing: 1px;
+    }
+
+    .companyInfo {
+        margin-bottom: 15px;
+        line-height: 1.6;
+        font-size: 14px;
+    }
+
+    .contactInfo {
+        margin-bottom: 15px;
+        font-size: 14px;
+
+        a {
+            color: #fff;
+            text-decoration: none;
+
+            &:hover {
+                color: #871b1b;
+            }
+        }
+    }
+}
+
+.socialIcons {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+
+    a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border: 1px solid #fff;
+        border-radius: 50%;
+        color: #fff;
+        text-decoration: none;
+        transition: all 0.3s ease;
+
+        &:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        i {
+            font-size: 16px;
+        }
+    }
+}
+
+.companyLinksColumn,
+.policiesColumn {
+    h2 {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        letter-spacing: 1px;
+    }
+
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        li {
+            margin-bottom: 12px;
+
+            &::before {
+                content: "•";
+                margin-right: 8px;
+            }
+
+            a {
+                color: #fff;
+                text-decoration: none;
+                font-size: 14px;
+                transition: color 0.3s ease;
+
+                &:hover {
+                    color: #871b1b;
+                }
+            }
+        }
+    }
+}
+
+.storeInfoColumn {
+    h2 {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        letter-spacing: 1px;
+    }
+
+    .storeName {
+        font-weight: bold;
+        margin-bottom: 10px;
+        font-size: 14px;
+    }
+
+    .storeAddress {
+        margin-bottom: 15px;
+        line-height: 1.5;
+        font-size: 14px;
+    }
+
+    .viewAllStores {
+        a {
+            color: #fff;
+            text-decoration: underline;
+            font-size: 14px;
+
+            &:hover {
+                color: #871b1b;
+            }
+        }
+    }
+}
+
+.bottomSection {
+    border-top: 1px solid #333;
+    padding-top: 20px;
+    text-align: center;
+    font-size: 14px;
+    color: #ccc;
+}
+
+// Responsive
+@media (max-width: 1024px) {
+    .contentWrapper {
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    .contentWrapper {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    .footerContainer {
+        padding: 30px 0;
+    }
+
+    .topSection {
+        padding: 0 15px;
+    }
+
+    .socialIcons {
+        justify-content: center;
+    }
+}

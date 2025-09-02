@@ -24,7 +24,7 @@ export default function Slider() {
                     <img style={{ width: '400px', objectFit: 'cover' }} src="//bizweb.dktcdn.net/100/462/587/themes/880841/assets/slider_3.jpg?1751344003198" className="d-block w-100" alt="Slide 2" />
                 </div>
                 <div className="carousel-item">
-                    <img style={{ width: '400px', objectFit: 'cover' }} src="//bizweb.dktcdn.net/100/462/587/themes/880841/assets/slider_2.jpg?1751344003198" className="d-block w-100" alt="Slide 3" />
+                    <img style={{ width: '400px', objectFit: 'cover' }} src="https://bizweb.dktcdn.net/100/462/587/themes/880841/assets/slider_2.jpg?1755556746118" className="d-block w-100" alt="Slide 3" />
                 </div>
             </div>
 
