@@ -1,17 +1,15 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import styles from "../../styles/user/ProductSearch.module.scss";
+import styles from "../../styles/user/ProductSearch.module.scss"; // Sử dụng cùng style với search
 
-export default function ProductsSearch() {
-    const location = useLocation();
+export default function ProductsByCategory() {
+    const { categoryId } = useParams(); // Lấy categoryId từ URL
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
+    const [categoryInfo, setCategoryInfo] = useState(null);
     const [loading, setLoading] = useState(true);
-
-    // lấy query param
-    const queryParams = new URLSearchParams(location.search);
-    const searchText = queryParams.get("search") || "";
+    const [error, setError] = useState(null);
 
     // Hàm lấy ảnh chính từ variants
     const getMainImage = (variants) => {
@@ -29,38 +27,63 @@ export default function ProductsSearch() {
         return '';
     };
 
+    // Hàm chuyển đến trang chi tiết sản phẩm
     const handleProductClick = (productId) => {
         navigate(`/products/${productId}`);
     };
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                setLoading(true);
-                const res = await axios.get("http://localhost:8080/api/v1/products/filter", {
-                    params: {
-                        name: searchText,
-                        page: 0,
-                        size: 12
-                    }
-                });
-                setProducts(res.data.data.content);
-            } catch (err) {
-                console.error("Error fetching products:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (searchText) {
-            fetchProducts();
+    // Lấy thông tin danh mục
+    const fetchCategoryInfo = async () => {
+        try {
+            const res = await axios.get(`http://localhost:8080/api/v1/categories/${categoryId}`);
+            setCategoryInfo(res.data.data);
+        } catch (err) {
+            console.error("Error fetching category info:", err);
         }
-    }, [searchText]);
+    };
+
+    // Lấy sản phẩm theo danh mục
+    const fetchProductsByCategory = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const res = await axios.get("http://localhost:8080/api/v1/products/filter", {
+                params: {
+                    categoryId: categoryId,
+                    page: 0,
+                    size: 20 // Có thể tăng số lượng sản phẩm hiển thị
+                }
+            });
+
+            setProducts(res.data.data.content || []);
+        } catch (err) {
+            console.error("Error fetching products by category:", err);
+            setError("Có lỗi xảy ra khi tải sản phẩm");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (categoryId) {
+            fetchCategoryInfo();
+            fetchProductsByCategory();
+        }
+    }, [categoryId]);
 
     if (loading) {
         return (
             <div className={styles.container}>
-                <p className={styles.loadingText}>Đang tải...</p>
+                <p className={styles.loadingText}>Đang tải sản phẩm...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className={styles.container}>
+                <p className={styles.noResults}>{error}</p>
             </div>
         );
     }
@@ -68,38 +91,41 @@ export default function ProductsSearch() {
     return (
         <div className={"container"}>
             {/* Breadcrumb */}
-            <nav nav className={styles.breadcrumb} >
-                <span className={styles.breadcrumbItem} onClick={() => navigate('/')}>Trang chủ</span>
-                <span className={styles.breadcrumbItem} style={{ 'color': "#871b1b" }}>Kết quả tìm kiếm</span>
-            </nav >
-
-            {/* Title */}
-            <h2 className={styles.title}>
-                Có {products.length} kết quả tìm kiếm phù hợp
-            </h2>
+            <nav className={styles.breadcrumb}>
+                <span className={styles.breadcrumbItem} onClick={() => navigate('/')}>
+                    Trang chủ
+                </span>
+                <span className={styles.breadcrumbItem} style={{ color: "#871b1b" }}>
+                    {categoryInfo ? categoryInfo.name : 'Danh mục sản phẩm'}
+                </span>
+            </nav>
 
             {/* Products Grid */}
             {products.length === 0 ? (
-                <p className={styles.noResults}>Không tìm thấy sản phẩm nào.</p>
+                <p className={styles.noResults}>
+                    Danh mục này chưa có sản phẩm nào.
+                </p>
             ) : (
                 <div className={styles.productsGrid}>
                     {products.map(product => (
-                        <div key={product.id}
+                        <div
+                            key={product.id}
                             onClick={() => handleProductClick(product.id)}
-                            className={styles.productCard}>
+                            className={styles.productCard}
+                        >
                             <img
                                 src={getMainImage(product.variants)}
                                 alt={product.name}
                                 className={styles.productImage}
                                 onError={(e) => {
-                                    e.target.src = 'https://via.placeholder.com/280x280?text=No+Image'; // fallback image
+                                    e.target.src = 'https://via.placeholder.com/280x280?text=No+Image';
                                 }}
                             />
                             <div className={styles.productInfo}>
                                 <h3 className={styles.productName}>{product.name}</h3>
                                 <p className={styles.productCode}>{product.sku}</p>
                                 <p className={styles.productPrice}>
-                                    {product.discountPrice ? (
+                                    {product.discountPrice && product.discountPrice !== product.price ? (
                                         <>
                                             <span className={styles.discountPrice}>
                                                 {product.discountPrice.toLocaleString('vi-VN')}đ

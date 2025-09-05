@@ -62,13 +62,11 @@ const ProductCreate = () => {
     };
 
     const redirectToLogin = () => {
-        // Điều chỉnh đường dẫn login theo project của bạn
-        navigate('/login'); // hoặc history.push('/login') cho v5
+        navigate('/login');
     };
 
     const isTokenExpired = (token) => {
         try {
-            // JWT token format: header.payload.signature
             const payload = JSON.parse(atob(token.split('.')[1]));
             const currentTime = Date.now() / 1000;
             return payload.exp < currentTime;
@@ -103,7 +101,7 @@ const ProductCreate = () => {
                 alert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
-                navigate('/login'); // hoặc history.push('/login')
+                navigate('/login');
             }
             return Promise.reject(error);
         }
@@ -397,7 +395,7 @@ const ProductCreate = () => {
 
             // Main image
             if (formData.mainImageUrl) {
-                productFormData.append('mainImage', formData.mainImageUrl);
+                productFormData.append('mainImageUrl', formData.mainImageUrl);
             }
 
             // Variants

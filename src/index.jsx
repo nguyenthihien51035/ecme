@@ -29,7 +29,13 @@ import ProductCreate from "./components/admin/ProductCreate";
 import ProductTable from "./components/admin/ProductTable";
 import ProductEdit from "./components/admin/ProductEdit";
 import ProductDetails from "./components/admin/ProductDetails";
+
 import ProductsPage from "./components/user/ProductSearch";
+import ProductDetail from "./components/user/ProductDetail";
+import Cart from "./components/user/Cart";
+import Favorites from "./components/user/Favorites";
+import ProductsByCategory from "./components/user/ProductByCategory";
+import Checkout from "./components/user/Checkout";
 
 const router = createBrowserRouter([
   // ================= User =================
@@ -39,6 +45,13 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "products", element: <ProductsPage /> },
+      { path: "products/:productId", element: <ProductDetail /> },
+      { path: "/cart", element: <Cart /> },
+      { path: "/favorites", element: <Favorites /> },
+      { path: "/products/category/:categoryId", element: <ProductsByCategory /> },
+      { path: "/checkout", element: <Checkout /> },
+
+
     ],
   },
 

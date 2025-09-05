@@ -1,6 +1,6 @@
 import styles from "../../styles/user/Header.module.scss";
 import logo from "../../assets/img/logo.png";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -11,11 +11,59 @@ export default function Header() {
   const currentPath = location.pathname;
   const [searchText, setSearchText] = useState("");
   const [searchResults, setSearchResults] = useState([]);
+  const [cartCount, setCartCount] = useState(0);
+  const [favoriteCount, setFavoriteCount] = useState(0);
+
+  useEffect(() => {
+    try {
+      const savedFavorites = localStorage.getItem("favorites");
+      if (savedFavorites) {
+        const favorites = JSON.parse(savedFavorites);
+        setFavoriteCount(favorites.length);
+      }
+    } catch (error) {
+      console.error("Error loading favorites:", error);
+      setFavoriteCount(0);
+    }
+  }, []);
+
+  // Lắng nghe favoritesUpdated
+  useEffect(() => {
+    const handleFavoritesUpdated = (e) => {
+      setFavoriteCount(e.detail.favoriteCount);
+    };
+    window.addEventListener("favoritesUpdated", handleFavoritesUpdated);
+    return () =>
+      window.removeEventListener("favoritesUpdated", handleFavoritesUpdated);
+  }, []);
 
   const handleSearch = async () => {
     if (!searchText.trim()) return;
     navigate(`/products?search=${encodeURIComponent(searchText)}`);
   };
+
+  useEffect(() => {
+    try {
+      const existingCart = localStorage.getItem("cart");
+      if (existingCart) {
+        const cart = JSON.parse(existingCart);
+        setCartCount(cart.reduce((total, item) => total + item.quantity, 0));
+      }
+    } catch (error) {
+      console.error("Error parsing cart from localStorage:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleCartUpdated = (event) => {
+      setCartCount(event.detail.cartCount);
+    };
+
+    window.addEventListener("cartUpdated", handleCartUpdated);
+    return () => {
+      window.removeEventListener("cartUpdated", handleCartUpdated);
+    };
+  }, []);
 
   return (
     <header className={styles.header}>
@@ -280,10 +328,10 @@ export default function Header() {
         {/* RIGHT: Icons */}
         <div className={styles.headerRight}>
           <div className={styles.iconGroup}>
-            <Link to="/wishlist">
+            <Link to="/favorites">
               <div className={styles.iconCircle}>
                 <i className="far fa-heart"></i>
-                <span className={styles.iconBadge}>0</span>
+                <span className={styles.iconBadge}>{favoriteCount}</span>
               </div>
               <div className={styles.iconLabel}>Yêu thích</div>
             </Link>
@@ -319,7 +367,7 @@ export default function Header() {
             <Link to="/cart">
               <div className={styles.iconCircle}>
                 <i className="fas fa-shopping-bag"></i>
-                <span className={styles.iconBadge}>1</span>
+                <span className={styles.iconBadge}>{cartCount}</span>
               </div>
               <div className={styles.iconLabel}>Giỏ hàng</div>
             </Link>

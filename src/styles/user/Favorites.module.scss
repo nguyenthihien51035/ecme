@@ -145,24 +145,91 @@
     }
 }
 
-// 
-// Thêm vào file ProductSearch.module.scss
-
-.categoryBanner {
-    margin-bottom: 30px;
+.emptyFavorites {
     text-align: center;
+    padding: 60px 20px;
 
-    .categoryImage {
-        width: 100%;
-        max-width: 800px;
-        height: 200px;
-        object-fit: cover;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    .noResults {
+        margin-bottom: 30px;
+        font-size: 18px;
+        color: #666;
+    }
 
-        @media (max-width: 768px) {
-            height: 150px;
-            border-radius: 8px;
+    .shopNowBtn {
+        background-color: #871b1b;
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+
+        &:hover {
+            background-color: #a01f1f;
+            transform: translateY(-1px);
+        }
+    }
+}
+
+.favoriteCard {
+    position: relative;
+
+    .removeBtn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        cursor: pointer;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+        &:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: scale(1.1);
+        }
+    }
+}
+
+.addedDate {
+    font-size: 12px;
+    color: #999;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+// Responsive for favorites
+@media (max-width: 768px) {
+    .favoriteCard .removeBtn {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+        top: 8px;
+        right: 8px;
+    }
+
+    .emptyFavorites {
+        padding: 40px 15px;
+
+        .noResults {
+            font-size: 16px;
+        }
+
+        .shopNowBtn {
+            padding: 10px 25px;
+            font-size: 14px;
         }
     }
 }

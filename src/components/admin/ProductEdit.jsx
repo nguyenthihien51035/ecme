@@ -6,8 +6,8 @@ import axios from 'axios';
 
 const ProductEdit = () => {
     const navigate = useNavigate();
-    const { productId } = useParams(); // Sửa từ 'id' thành 'productId'
-    const id = productId; // Giữ biến id để không phải sửa nhiều chỗ
+    const { productId } = useParams();
+    const id = productId;
 
     console.log('All URL params:', useParams());
     console.log('Product ID from params:', productId);
@@ -21,6 +21,9 @@ const ProductEdit = () => {
     const [productLoading, setProductLoading] = useState(true);
     const [productNotFound, setProductNotFound] = useState(false);
     const [error, setError] = useState('');
+
+    // Lưu dữ liệu gốc để so sánh thay đổi
+    const [originalData, setOriginalData] = useState(null);
 
     useEffect(() => {
         checkUserPermission();
@@ -86,15 +89,15 @@ const ProductEdit = () => {
     // Axios instance
     const api = axios.create({
         baseURL: API_BASE_URL,
-        headers: {
-            'Content-Type': 'application/json',
-        }
     });
 
     api.interceptors.request.use((config) => {
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
+        }
+        if (!config.headers['Content-Type'] && !(config.data instanceof FormData)) {
+            config.headers['Content-Type'] = 'application/json';
         }
         return config;
     });
@@ -127,7 +130,7 @@ const ProductEdit = () => {
     const productAPI = {
         getById: (id) => api.get(`/products/${id}`),
         update: (id, data) => api.put(`/products/${id}`, data, {
-            headers: { 'Content-Type': 'multipart/form-data' }
+            headers: {}
         })
     };
 
@@ -140,7 +143,7 @@ const ProductEdit = () => {
         categoryId: '',
         inStock: true,
         mainImageUrl: null,
-        currentMainImageUrl: '', // Store current image URL from server
+        currentMainImageUrl: '',
         variant: []
     });
 
@@ -196,31 +199,20 @@ const ProductEdit = () => {
     const loadProductData = async () => {
         try {
             setProductLoading(true);
-            console.log('Đang tải sản phẩm với ID:', productId);
-
-            if (!productId) {
-                console.error('Product ID không tồn tại');
-                setProductNotFound(true);
-                return;
-            }
 
             const response = await productAPI.getById(productId);
-            console.log('Phản hồi API hoàn chỉnh:', response);
-            console.log('Response data:', response.data);
             const product = response.data.data || response.data;
-            console.log('Product data:', product);
+            console.log('Product loaded:', product);
 
-            // Lấy danh sách màu để ánh xạ
             const colorsResponse = await colorAPI.getAll();
             const allColors = colorsResponse.data.data || colorsResponse.data;
-            console.log('Danh sách màu:', allColors);
 
-            const mainImage =
-                product.variants
-                    ?.flatMap(v => v.images)
-                    ?.find(img => img.isMain)?.imageUrl || '';
+            const mainImage = product.mainImageUrl ||
+                product.variants?.flatMap(v => v.images)?.find(img => img.isMain)?.imageUrl || '';
 
-            setFormData({
+            console.log('Main image resolved:', mainImage);
+
+            const processedFormData = {
                 name: product.name || '',
                 sku: product.sku || '',
                 description: product.description || '',
@@ -231,28 +223,33 @@ const ProductEdit = () => {
                 mainImageUrl: null,
                 currentMainImageUrl: mainImage,
                 variant: (product.variants || []).map(variant => {
-                    // Tìm màu theo tên (colorName từ response)
                     const matchingColor = allColors.find(color => color.name === variant.colorName);
                     return {
-                        id: variant.id, // Giữ nguyên ID từ server
-                        originalId: variant.id, // Lưu ID gốc để gửi lên server
+                        id: Date.now() + Math.random(), // UI ID
+                        originalId: variant.id, // Database ID thực
                         colorId: matchingColor ? matchingColor.id.toString() : '',
                         colorName: variant.colorName || '',
                         size: variant.size || '',
                         quantity: variant.quantity ? variant.quantity.toString() : '',
+                        isExisting: true,
                         images: (variant.images || []).map(img => ({
-                            id: img.id, // Giữ nguyên ID từ server
+                            id: img.id, // Database ID
                             imageUrl: img.imageUrl || '',
                             isMain: img.isMain || false,
                             preview: img.imageUrl || '',
-                            isExisting: true
+                            isExisting: true,
+                            originalIsMain: img.isMain || false // Lưu trạng thái gốc
                         }))
                     };
                 })
-            });
+            };
+
+            setFormData(processedFormData);
+            // Lưu dữ liệu gốc để so sánh
+            setOriginalData(JSON.parse(JSON.stringify(processedFormData)));
+
         } catch (error) {
             console.error('Lỗi khi tải sản phẩm:', error);
-            console.error('Chi tiết lỗi:', error.response?.data);
             if (error.response?.status === 404) {
                 setProductNotFound(true);
             } else {
@@ -275,12 +272,16 @@ const ProductEdit = () => {
 
     const addVariant = () => {
         const newVariant = {
-            id: Date.now(),
+            id: Date.now() + Math.random(),
+            originalId: null, // Variant mới không có ID database
             colorId: '',
+            colorName: '',
             size: '',
             quantity: '',
-            images: []
+            images: [],
+            isExisting: false
         };
+
         setFormData(prev => ({
             ...prev,
             variant: [...prev.variant, newVariant]
@@ -312,11 +313,11 @@ const ProductEdit = () => {
         input.onchange = (event) => {
             const files = Array.from(event.target.files);
             const newImages = files.map((file, index) => ({
-                id: Date.now() + index,
+                id: Date.now() + index + Math.random(),
                 imageUrl: file,
                 isMain: false,
                 preview: URL.createObjectURL(file),
-                isExisting: false // Mark as new image
+                isExisting: false
             }));
 
             setFormData(prev => ({
@@ -358,6 +359,71 @@ const ProductEdit = () => {
                     : v
             )
         }));
+    };
+
+    // Hàm kiểm tra thay đổi variant
+    const checkVariantChanges = () => {
+        if (!originalData) return false;
+
+        const originalVariants = originalData.variant;
+        const currentVariants = formData.variant;
+
+        // So sánh số lượng variant
+        if (originalVariants.length !== currentVariants.length) return true;
+
+        // So sánh từng variant
+        for (let i = 0; i < currentVariants.length; i++) {
+            const current = currentVariants[i];
+            const original = originalVariants.find(v => v.originalId === current.originalId);
+
+            if (!original && current.isExisting) return true; // Variant bị xóa
+            if (!current.isExisting) return true; // Variant mới
+
+            // So sánh thuộc tính cơ bản
+            if (original.colorId !== current.colorId ||
+                original.size !== current.size ||
+                original.quantity !== current.quantity) {
+                return true;
+            }
+
+            // So sánh ảnh
+            if (checkVariantImageChanges(current, original)) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    const checkVariantImageChanges = (currentVariant, originalVariant) => {
+        if (!originalVariant) return currentVariant.images.length > 0;
+
+        const currentImages = currentVariant.images;
+        const originalImages = originalVariant.images;
+
+        // So sánh số lượng ảnh
+        if (currentImages.length !== originalImages.length) return true;
+
+        // Kiểm tra ảnh mới
+        const hasNewImages = currentImages.some(img => !img.isExisting);
+        if (hasNewImages) return true;
+
+        // Kiểm tra thay đổi isMain
+        for (const currentImg of currentImages) {
+            if (currentImg.isExisting) {
+                const originalImg = originalImages.find(img => img.id === currentImg.id);
+                if (originalImg && originalImg.originalIsMain !== currentImg.isMain) {
+                    return true;
+                }
+            }
+        }
+
+        // Kiểm tra ảnh bị xóa
+        const currentImageIds = currentImages.filter(img => img.isExisting).map(img => img.id);
+        const originalImageIds = originalImages.map(img => img.id);
+        const removedImages = originalImageIds.filter(id => !currentImageIds.includes(id));
+
+        return removedImages.length > 0;
     };
 
     const addNewColor = async () => {
@@ -442,24 +508,8 @@ const ProductEdit = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validation
         if (!formData.name.trim()) {
             alert('Vui lòng nhập tên sản phẩm!');
-            return;
-        }
-
-        if (!formData.sku.trim()) {
-            alert('Vui lòng nhập SKU!');
-            return;
-        }
-
-        if (!formData.price || formData.price <= 0) {
-            alert('Vui lòng nhập giá hợp lệ!');
-            return;
-        }
-
-        if (!formData.categoryId) {
-            alert('Vui lòng chọn danh mục!');
             return;
         }
 
@@ -468,7 +518,7 @@ const ProductEdit = () => {
 
             const productFormData = new FormData();
 
-            // Basic product info
+            // Thông tin cơ bản - luôn gửi
             productFormData.append('name', formData.name.trim());
             productFormData.append('sku', formData.sku.trim());
             productFormData.append('description', formData.description.trim());
@@ -480,55 +530,107 @@ const ProductEdit = () => {
                 productFormData.append('discountPrice', formData.discountPrice);
             }
 
-            // Main image - only append if new file selected
-            if (formData.mainImageUrl) {
+            // Ảnh chính - chỉ gửi khi có file mới
+            if (formData.mainImageUrl instanceof File) {
                 productFormData.append('mainImageUrl', formData.mainImageUrl);
-            } else if (formData.currentMainImageUrl) {
-                // Nếu không chọn ảnh mới, gửi ảnh cũ lên dưới tên mainImageUrlOld
-                productFormData.append('mainImageUrlOld', formData.currentMainImageUrl);
+                console.log('Gửi ảnh chính mới:', formData.mainImageUrl.name);
             }
+            // Nếu không có file mới -> không gửi gì (BE giữ nguyên)
 
-            // Variants
-            formData.variant.forEach((variant, index) => {
-                if (variant.colorId && variant.size && variant.quantity) {
-                    // Nếu có id (update), gửi id lên
-                    if (variant.id) {
-                        productFormData.append(`variant[${index}].id`, variant.id);
+            // Variant - chỉ gửi khi có thay đổi
+            const hasVariantChanges = checkVariantChanges();
+            console.log('Có thay đổi variant:', hasVariantChanges);
+
+            if (hasVariantChanges) {
+                const validVariants = formData.variant.filter(variant =>
+                    variant.colorId && variant.size && variant.quantity
+                );
+
+                console.log('Xử lý', validVariants.length, 'variant hợp lệ');
+
+                validVariants.forEach((variant, variantIndex) => {
+                    console.log(`Xử lý variant ${variantIndex}:`, variant);
+
+                    // ID variant (chỉ gửi cho variant đã tồn tại)
+                    if (variant.isExisting && variant.originalId) {
+                        productFormData.append(`variant[${variantIndex}].id`, variant.originalId);
                     }
 
-                    productFormData.append(`variant[${index}].colorId`, variant.colorId);
-                    productFormData.append(`variant[${index}].size`, variant.size);
-                    productFormData.append(`variant[${index}].quantity`, variant.quantity);
+                    productFormData.append(`variant[${variantIndex}].colorId`, variant.colorId);
+                    productFormData.append(`variant[${variantIndex}].size`, variant.size);
+                    productFormData.append(`variant[${variantIndex}].quantity`, variant.quantity);
 
-                    // Xử lý images
-                    let imageIndex = 0;
-                    variant.images.forEach((image) => {
-                        if (image.isExisting) {
-                            // Ảnh cũ
-                            productFormData.append(`variant[${index}].images[${imageIndex}].id`, image.id);
-                            productFormData.append(`variant[${index}].images[${imageIndex}].isMain`, image.isMain);
-                        } else if (image.imageUrl instanceof File) {
-                            // Ảnh mới
-                            productFormData.append(`variant[${index}].images[${imageIndex}].imageUrl`, image.imageUrl);
-                            productFormData.append(`variant[${index}].images[${imageIndex}].isMain`, image.isMain);
-                        }
-                        imageIndex++;
-                    });
+                    // Ảnh variant - kiểm tra thay đổi
+                    const originalVariant = originalData?.variant.find(v => v.originalId === variant.originalId);
+                    const hasImageChanges = checkVariantImageChanges(variant, originalVariant);
+
+                    if (hasImageChanges || !variant.isExisting) {
+                        console.log(`Variant ${variantIndex} có thay đổi ảnh`);
+
+                        const validImages = variant.images.filter(image => {
+                            if (image.isExisting && image.id) return true;
+                            if (!image.isExisting && image.imageUrl instanceof File) return true;
+                            return false;
+                        });
+
+                        validImages.forEach((image, imageIndex) => {
+                            if (image.isExisting && image.id) {
+                                // Ảnh cũ
+                                productFormData.append(`variant[${variantIndex}].images[${imageIndex}].id`, image.id);
+                                productFormData.append(`variant[${variantIndex}].images[${imageIndex}].isMain`, image.isMain || false);
+
+                                // Nếu ảnh cũ được thay bằng file mới
+                                if (image.imageUrl instanceof File) {
+                                    productFormData.append(`variant[${variantIndex}].images[${imageIndex}].imageUrl`, image.imageUrl);
+                                }
+                            } else if (!image.isExisting && image.imageUrl instanceof File) {
+                                // Ảnh mới
+                                productFormData.append(`variant[${variantIndex}].images[${imageIndex}].imageUrl`, image.imageUrl);
+                                productFormData.append(`variant[${variantIndex}].images[${imageIndex}].isMain`, image.isMain || false);
+                            }
+                        });
+
+                        console.log(`Variant ${variantIndex} gửi ${validImages.length} ảnh`);
+                    }
+                });
+            }
+            // Nếu không có thay đổi variant -> không gửi mảng variant (BE giữ nguyên)
+
+            // Debug FormData
+            console.log('=== DEBUG FORMDATA CUỐI ===');
+            for (let pair of productFormData.entries()) {
+                if (pair[1] instanceof File) {
+                    console.log(`${pair[0]}: [FILE] ${pair[1].name} (${pair[1].size} bytes)`);
+                } else {
+                    console.log(`${pair[0]}: ${pair[1]}`);
                 }
-            });
+            }
 
-            const response = await productAPI.update(productId, productFormData);
+            // Gửi request
+            const token = localStorage.getItem('token');
+            const response = await axios.put(
+                `${API_BASE_URL}/products/${productId}`,
+                productFormData,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    }
+                }
+            );
 
+            console.log('Phản hồi cập nhật:', response.data);
             alert('Cập nhật sản phẩm thành công!');
-            console.log('Updated product:', response.data);
-
-            // Navigate back to product list or detail
             navigate('/admin/products/list');
 
         } catch (error) {
-            console.error('Error updating product:', error);
+            console.error('=== LỖI CẬP NHẬT ===');
+            console.error('Error:', error);
+            console.error('Response:', error.response?.data);
+
             if (error.response?.status === 400) {
                 alert(error.response.data.message || 'Dữ liệu không hợp lệ!');
+            } else if (error.response?.status === 403) {
+                alert('Không có quyền thực hiện thao tác này!');
             } else if (error.response?.status === 409) {
                 alert('SKU đã tồn tại!');
             } else {
@@ -784,7 +886,11 @@ const ProductEdit = () => {
                                 {formData.variant.map((variant, index) => (
                                     <div key={variant.id} className={styles.variantCard}>
                                         <div className={styles.variantHeader}>
-                                            <h3 className={styles.variantTitle}>Biến thể #{index + 1}</h3>
+                                            <h3 className={styles.variantTitle}>
+                                                Biến thể #{index + 1}
+                                                {variant.isExisting && <span className={styles.existingBadge}> (Đã có)</span>}
+                                                {!variant.isExisting && <span className={styles.newBadge}> (Mới)</span>}
+                                            </h3>
                                             <button
                                                 type="button"
                                                 onClick={() => removeVariant(variant.id)}
@@ -1099,6 +1205,6 @@ const ProductEdit = () => {
             </div>
         </div>
     );
-};
+}
 
 export default ProductEdit;

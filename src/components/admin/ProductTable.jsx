@@ -207,7 +207,7 @@ const ProductList = () => {
                         Làm mới
                     </button>
 
-                    <button className={styles.addButton}>
+                    <button className={styles.addButton} onClick={() => navigate('/admin/products/create')}>
                         <Plus size={20} />
                         Thêm sản phẩm
                     </button>

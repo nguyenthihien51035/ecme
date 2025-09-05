@@ -181,6 +181,16 @@
     font-weight: 700;
     color: #881b1b;
     margin: 0;
+    display: flex;
+
+    .oldPrice {
+        color: #888;
+        text-decoration: line-through;
+    }
+
+    .discountPrice {
+        margin-right: 6px;
+    }
 }
 
 // New Products Section Styles
