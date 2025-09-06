@@ -36,6 +36,7 @@ import Cart from "./components/user/Cart";
 import Favorites from "./components/user/Favorites";
 import ProductsByCategory from "./components/user/ProductByCategory";
 import Checkout from "./components/user/Checkout";
+import OrderDetails from "./components/user/OrderDetail";
 
 const router = createBrowserRouter([
   // ================= User =================
@@ -50,6 +51,8 @@ const router = createBrowserRouter([
       { path: "/favorites", element: <Favorites /> },
       { path: "/products/category/:categoryId", element: <ProductsByCategory /> },
       { path: "/checkout", element: <Checkout /> },
+      { path: "/orders/:id", element: <OrderDetails /> },
+
 
 
     ],

@@ -34,7 +34,7 @@
         .title {
             font-size: 32px;
             font-weight: 700;
-            color: #881b1b;
+            color: #ae0404;
             line-height: 1.2;
 
             .subtitle {
@@ -102,7 +102,7 @@
 
             &:focus {
                 outline: none;
-                border-color: #be185d;
+                border-color: #ae0404;
                 box-shadow: 0 0 0 3px rgba(190, 24, 93, 0.1);
             }
         }
@@ -139,7 +139,7 @@
         .checkbox {
             width: 16px;
             height: 16px;
-            accent-color: #be185d;
+            accent-color: #ae0404;
         }
 
         .checkboxLabel {
@@ -171,7 +171,7 @@
                 .radio {
                     width: 16px;
                     height: 16px;
-                    accent-color: #881b1b;
+                    accent-color: #ae0404;
                 }
 
                 .radioLabel {
@@ -191,7 +191,7 @@
 
     .submitButton {
         width: 100%;
-        background: #881b1b;
+        background: #ae0404;
         color: white;
         padding: 12px 24px;
         border-radius: 8px;
@@ -204,7 +204,7 @@
         letter-spacing: 0.5px;
 
         &:hover {
-            background: #a21650;
+            background: #881b1b;
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(190, 24, 93, 0.3);
         }
@@ -362,17 +362,6 @@
                     color: #6b7280;
                     margin: 0;
                 }
-
-                .originalPrice {
-                    text-decoration: line-through;
-                    color: #888;
-                    margin-right: 6px;
-                }
-
-                .salePrice {
-                    font-weight: bold;
-                }
-
             }
         }
     }
@@ -395,7 +384,7 @@
                 &.totalRow {
                     font-size: 18px;
                     font-weight: 700;
-                    color: #881b1b;
+                    color: #ae0404;
                     padding-top: 16px;
                 }
             }
@@ -465,6 +454,237 @@
                 }
             }
         }
+    }
+}
+
+.successSection {
+    margin-top: 32px;
+    padding: 24px;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+    border: 1px solid #bbf7d0;
+    border-radius: 12px;
+
+    .successMessage {
+        text-align: center;
+        margin-bottom: 24px;
+
+        .actionButtons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+
+            .viewOrderButton {
+                background: #ae0404;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 600;
+                border: none;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+
+                &:hover {
+                    background: #881b1b;
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 12px rgba(174, 4, 4, 0.3);
+                }
+
+                // Icon cho button (optional)
+                &::before {
+                    content: '👁';
+                    font-size: 16px;
+                }
+            }
+        }
+
+        .successIcon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 16px;
+            color: #16a34a;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+
+            svg {
+                width: 32px;
+                height: 32px;
+            }
+        }
+
+        h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #15803d;
+            margin: 0 0 12px 0;
+        }
+
+        p {
+            font-size: 14px;
+            color: #166534;
+            margin: 4px 0;
+
+            strong {
+                color: #ae0404;
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        .successMessage .actionButtons {
+            .viewOrderButton {
+                padding: 10px 20px;
+                font-size: 13px;
+            }
+        }
+    }
+}
+
+// QR Code Section - có thể đặt riêng hoặc trong successSection
+.qrCodeSection {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    border: 2px solid #e5e7eb;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+
+    h4 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #374151;
+        margin: 0 0 20px 0;
+    }
+
+    .qrCodeContainer {
+        background: #f9fafb;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+        border: 1px solid #e5e7eb;
+
+        .qrCodeImage {
+            max-width: 400px;
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+    }
+
+    .bankInfo {
+        text-align: left;
+
+        .bankNote {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .paymentAmount {
+            background: #ae0404;
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 12px;
+
+            strong {
+                font-size: 20px;
+            }
+        }
+
+        .orderInfo {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: center;
+
+            strong {
+                color: #ae0404;
+                font-weight: 600;
+            }
+        }
+    }
+}
+
+// Responsive cho success section
+@media (max-width: 768px) {
+    .successSection {
+        margin-top: 24px;
+        padding: 20px;
+
+        .successMessage {
+            margin-bottom: 20px;
+
+            .successIcon {
+                width: 50px;
+                height: 50px;
+
+                svg {
+                    width: 28px;
+                    height: 28px;
+                }
+            }
+
+            h3 {
+                font-size: 18px;
+            }
+
+            p {
+                font-size: 13px;
+            }
+        }
+    }
+
+    .qrCodeSection {
+        padding: 20px;
+
+        h4 {
+            font-size: 16px;
+        }
+
+        .qrCodeContainer {
+            padding: 20px;
+
+            .qrCodeImage {
+                max-width: 180px;
+            }
+        }
+
+        .bankInfo {
+            .paymentAmount {
+                padding: 14px;
+                font-size: 15px;
+
+                strong {
+                    font-size: 18px;
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .qrCodeContainer .qrCodeImage {
+        max-width: 160px;
     }
 }
 
@@ -549,6 +769,59 @@
 
         .productPrice .totalPrice {
             font-size: 13px;
+        }
+    }
+
+    // Success section mobile
+    .successSection {
+        padding: 16px;
+
+        .successMessage {
+            margin-bottom: 16px;
+
+            .successIcon {
+                width: 40px;
+                height: 40px;
+                margin-bottom: 12px;
+            }
+
+            h3 {
+                font-size: 18px;
+            }
+
+            p {
+                font-size: 13px;
+            }
+        }
+
+        .qrCodeSection {
+            padding-top: 16px;
+
+            h4 {
+                font-size: 16px;
+                margin-bottom: 16px;
+            }
+
+            .qrCodeContainer {
+                padding: 12px;
+                margin-bottom: 16px;
+
+                .qrCodeImage {
+                    max-width: 160px;
+                }
+            }
+
+            .bankInfo {
+                .bankNote {
+                    font-size: 12px;
+                    margin-bottom: 10px;
+                }
+
+                .paymentAmount {
+                    font-size: 14px;
+                    padding: 10px;
+                }
+            }
         }
     }
 }

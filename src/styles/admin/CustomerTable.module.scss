@@ -240,7 +240,6 @@
         font-size: 12px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        border: 1px solid #86efac;
     }
 
     .statusBlocked {
@@ -252,7 +251,6 @@
         font-size: 12px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        border: 1px solid #f87171;
     }
 }
 
@@ -335,50 +333,29 @@
     }
 
     &.viewButton {
-        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        background: #dbeafe;
         color: #1e40af;
-        border: 1px solid #93c5fd;
 
         &:hover {
-            background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 6px 16px rgba(30, 64, 175, 0.3);
-        }
-
-        &:hover::before {
-            background: rgba(255, 255, 255, 0.2);
+            background: #bfdbfe;
         }
     }
 
     &.editButton {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        background: #fef3c7;
         color: #d97706;
-        border: 1px solid #f59e0b;
 
         &:hover {
-            background: linear-gradient(135deg, #fde68a 0%, #fbbf24 100%);
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 6px 16px rgba(217, 119, 6, 0.3);
-        }
-
-        &:hover::before {
-            background: rgba(255, 255, 255, 0.2);
+            background: #fde68a;
         }
     }
 
     &.deleteButton {
-        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        background: #fee2e2;
         color: #dc2626;
-        border: 1px solid #f87171;
 
         &:hover {
-            background: linear-gradient(135deg, #fecaca 0%, #f87171 100%);
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 6px 16px rgba(220, 38, 38, 0.3);
-        }
-
-        &:hover::before {
-            background: rgba(255, 255, 255, 0.2);
+            background: #fecaca;
         }
     }
 

@@ -7,6 +7,10 @@ const Checkout = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [user, setUser] = useState(null);
+    const [orderSuccess, setOrderSuccess] = useState(false);
+    const [orderId, setOrderId] = useState(null);
+    const [qrCodeUrl, setQrCodeUrl] = useState('');
+    const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
         email: '',
@@ -17,6 +21,19 @@ const Checkout = () => {
         note: '',
         payment: 'cod'
     });
+
+    const generateVietQR = (bankId, accountNo, accountName, amount, description) => {
+        const baseUrl = 'https://img.vietqr.io/image';
+        const template = 'compact2'; // hoặc template khác
+
+        const qrUrl = `${baseUrl}/${bankId}-${accountNo}-${template}.png?amount=${amount}&addInfo=${encodeURIComponent(description)}&accountName=${encodeURIComponent(accountName)}`;
+
+        return qrUrl;
+    };
+
+    const BANK_ID = "VCB"; // Mã ngân hàng của bạn
+    const ACCOUNT_NO = "1027714100"; // Số tài khoản của bạn  
+    const ACCOUNT_NAME = "NGUYEN THI HIEN"; // Tên chủ tài khoản
 
     // Load cart items from localStorage
     useEffect(() => {
@@ -48,24 +65,48 @@ const Checkout = () => {
     }, []);
 
     // Calculate totals
-    const subtotal = cartItems.reduce((sum, item) => {
-        const finalPrice = item.discountPrice && item.discountPrice < item.price
-            ? item.discountPrice
-            : item.price;
-        return sum + (finalPrice * item.quantity);
-    }, 0);
-
+    const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const shippingFee = 0; // Free shipping
     const total = subtotal + shippingFee;
 
-    // Handle form input changes
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: type === 'checkbox' ? checked : value
         }));
+
+        // Xử lý khi thay đổi phương thức thanh toán
+        if (name === 'payment') {
+            if (value === 'bank_transfer' && total > 0) {
+                // Tạo QR preview với description tạm thời
+                const previewQR = generateVietQR(
+                    BANK_ID,
+                    ACCOUNT_NO,
+                    ACCOUNT_NAME,
+                    total,
+                    "PREVIEW ORDER" // Description tạm cho preview
+                );
+                setQrCodeUrl(previewQR);
+            } else {
+                setQrCodeUrl(''); // Xóa QR khi chọn COD
+            }
+        }
     };
+
+    // cập nhật QR khi total thay đổi
+    useEffect(() => {
+        if (formData.payment === 'bank_transfer' && total > 0) {
+            const previewQR = generateVietQR(
+                BANK_ID,
+                ACCOUNT_NO,
+                ACCOUNT_NAME,
+                total,
+                "PREVIEW ORDER"
+            );
+            setQrCodeUrl(previewQR);
+        }
+    }, [total, formData.payment]);
 
     // Format price to Vietnamese currency
     const formatPrice = (price) => {
@@ -74,12 +115,22 @@ const Checkout = () => {
 
     // Handle form submission
     const handleSubmit = async () => {
+        const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+        if (!token) {
+            setError('Vui lòng đăng nhập để đặt hàng');
+            setLoading(false);
+            return;
+        }
+        console.log('Token exists:', !!token);
+        console.log('Token value:', token ? token.substring(0, 20) + '...' : 'null');
+
         setLoading(true);
         setError('');
+        setQrCodeUrl('');
 
         try {
             // Validate required fields
-            if (!formData.email || !formData.name || !formData.phone || !formData.address) {
+            if (!formData.name || !formData.phone || !formData.address) {
                 throw new Error('Vui lòng điền đầy đủ thông tin');
             }
 
@@ -87,62 +138,80 @@ const Checkout = () => {
                 throw new Error('Giỏ hàng trống');
             }
 
-            // Prepare order data
+            // Prepare order data matching your API
             const orderData = {
-                customerInfo: {
-                    email: formData.email,
-                    name: formData.name,
-                    phone: formData.phone,
-                    address: formData.address,
-                    note: formData.note
-                },
+                shippingName: formData.name,
+                shippingPhone: formData.phone,
+                shippingAddress: formData.address,
+                note: formData.note || '',
+                paymentMethod: formData.payment === 'cod' ? 'COD' : 'BANK_TRANSFER',
                 items: cartItems.map(item => ({
-                    productId: item.productId,
                     variantId: item.variantId,
-                    name: item.name,
-                    sku: item.sku,
-                    color: item.color,
-                    size: item.size,
-                    price: item.price,
                     quantity: item.quantity,
-                    image: item.image
+                    price: item.price  // Có thể cần đổi thành BigDecimal nếu lỗi
                 })),
-                payment: formData.payment,
                 subtotal: subtotal,
                 shippingFee: shippingFee,
-                total: total,
-                orderDate: new Date().toISOString()
+                total: total
             };
 
-            // Mock API call
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Call your API
+            const response = await fetch('http://localhost:8080/api/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(orderData)
+            });
 
-            console.log('Order placed:', orderData);
+            if (!response.ok) {
+                let errorMessage = `Lỗi: ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.message || errorData.errorMessage || errorMessage;
+                } catch (jsonError) {
+                    // If response is not JSON, use status text
+                    errorMessage = response.statusText || errorMessage;
+                }
+                throw new Error(errorMessage);
+            }
 
-            // Clear cart after successful order
+            let result;
+            try {
+                result = await response.json();
+            } catch (jsonError) {
+                throw new Error('Server trả về dữ liệu không hợp lệ');
+            }
+
+            if (result.errorMessage) {
+                throw new Error(result.errorMessage);
+            }
+            // Trong hàm handleSubmit, sau khi nhận response, thêm debug:
+            console.log('Full API response:', result);
+            console.log('Order response data:', result.data);
+            console.log('QR Code URL from API:', result.data.qrCodeUrl);
+
+            // Handle success
+            const orderResponse = result.data;
+            setOrderId(orderResponse.id);
+            setOrderSuccess(true);
+
+            // Sửa điều kiện QR code - kiểm tra cả 2 trường hợp
+            if (orderResponse.qrCodeUrl) {  // Đơn giản hóa điều kiện
+                console.log('Setting QR code URL:', orderResponse.qrCodeUrl);
+                setQrCodeUrl(orderResponse.qrCodeUrl);
+            }
+
+            // Clear cart
             localStorage.removeItem('cart');
-
-            // Dispatch cart updated event
             window.dispatchEvent(new CustomEvent('cartUpdated', {
                 detail: { cartCount: 0 }
             }));
-
-            // Show success message
-            alert('Đặt hàng thành công! Chúng tôi sẽ liên hệ với bạn sớm nhất.');
-
-            // Reset form
-            setFormData({
-                email: '',
-                name: '',
-                phone: '',
-                address: '',
-                different_address: false,
-                note: '',
-                payment: 'cod'
-            });
             setCartItems([]);
 
         } catch (err) {
+            console.error('Order error:', err);
             setError(err.message || 'Có lỗi xảy ra khi đặt hàng');
         } finally {
             setLoading(false);
@@ -153,8 +222,6 @@ const Checkout = () => {
         window.location.href = '/';
     };
 
-    const navigate = useNavigate();
-
     return (
         <div className={styles.checkout}>
             <div className={styles.container}>
@@ -162,7 +229,7 @@ const Checkout = () => {
                     {/* Form Section */}
                     <div className={styles.formSection}>
                         <div className={styles.header}>
-                            <h1 className={styles.title} onClick={() => navigate('/')}>
+                            <h1 className={styles.title}>
                                 RUBIES <span className={styles.subtitle}>est. 2015</span>
                             </h1>
                         </div>
@@ -238,17 +305,6 @@ const Checkout = () => {
                                 />
                             </div>
 
-                            {/* <div className={styles.checkboxGroup}>
-                                <input
-                                    type="checkbox"
-                                    name="different_address"
-                                    checked={formData.different_address}
-                                    onChange={handleInputChange}
-                                    className={styles.checkbox}
-                                />
-                                <label className={styles.checkboxLabel}>Giao hàng đến địa chỉ khác</label>
-                            </div> */}
-
                             {/* Notes */}
                             <div className={styles.inputGroup}>
                                 <label className={styles.label}>Ghi chú (tùy chọn)</label>
@@ -300,6 +356,50 @@ const Checkout = () => {
                             >
                                 {loading ? 'ĐANG XỬ LÝ...' : 'ĐẶT HÀNG'}
                             </button>
+
+                            {/* Success Message & QR Code */}
+                            {orderSuccess && (
+                                <div className={styles.successSection}>
+                                    <div className={styles.successMessage}>
+                                        <div className={styles.successIcon}>
+                                            <svg viewBox="0 0 20 20" fill="currentColor">
+                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                            </svg>
+                                        </div>
+                                        <h3>Đặt hàng thành công!</h3>
+                                        <p>Mã đơn hàng: <strong>#{orderId}</strong></p>
+                                        <p>Chúng tôi sẽ liên hệ với bạn sớm nhất.</p>
+
+                                        <div className={styles.actionButtons}>
+                                            <button
+                                                onClick={() => navigate(`/orders/${orderId}`)}
+                                                className={styles.viewOrderButton}
+                                            >
+                                                Xem chi tiết đơn hàng
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {/* formData.payment === 'bank_transfer' &&  */}
+                                    {/* QR Code for Bank Transfer */}
+                                    {qrCodeUrl && (
+                                        <div className={styles.qrCodeSection}>
+                                            <h4>Quét mã QR để thanh toán</h4>
+                                            <div className={styles.qrCodeContainer}>
+                                                <img
+                                                    src={qrCodeUrl}
+                                                    alt="QR Code thanh toán"
+                                                    className={styles.qrCodeImage}
+                                                />
+                                            </div>
+                                            <div className={styles.bankInfo}>
+                                                <p className={styles.bankNote}>
+                                                    Vui lòng chuyển khoản đúng số tiền và nội dung để đơn hàng được xử lý nhanh nhất.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -343,27 +443,12 @@ const Checkout = () => {
                                                 <p className={styles.productSku}>Mã: {item.sku}</p>
                                             </div>
                                             <div className={styles.productPrice}>
-                                                {item.discountPrice && item.discountPrice < item.price ? (
-                                                    <>
-                                                        <p className={styles.totalPrice}>
-                                                            {formatPrice(item.quantity * item.discountPrice)}
-                                                        </p>
-                                                        <p className={styles.unitPrice}>
-                                                            <span className={styles.originalPrice}>{formatPrice(item.price)}</span>
-                                                            <span className={styles.salePrice}>{formatPrice(item.discountPrice)} x {item.quantity}</span>
-                                                        </p>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <p className={styles.totalPrice}>
-                                                            {formatPrice(item.quantity * item.price)}
-                                                        </p>
-                                                        <p className={styles.unitPrice}>
-                                                            {formatPrice(item.price)} x {item.quantity}
-                                                        </p>
-                                                    </>
-                                                )}
-
+                                                <p className={styles.totalPrice}>
+                                                    {formatPrice(item.quantity * item.price)}
+                                                </p>
+                                                <p className={styles.unitPrice}>
+                                                    {formatPrice(item.price)} x {item.quantity}
+                                                </p>
                                             </div>
                                         </div>
                                     ))
